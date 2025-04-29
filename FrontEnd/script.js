@@ -78,6 +78,14 @@ function toggleMenu() {
 
         menu.appendChild(form);
 
+        // Error connexion
+        const textError = document.createElement("p");
+        textError.classList.add("text_error_connexion");
+        textError.textContent = "";
+        textError.style.color = "red"
+
+        menu.appendChild(textError);
+
         // Lien mot de passe oublié
         const p = document.createElement("p");
         const a = document.createElement("a");
@@ -120,7 +128,7 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
          user_open.innerHTML = "log out";
          window.location.reload();
      } else {
-         const user_open = document.querySelector(".zone_connexion p");
+         const user_open = document.querySelector(".text_error_connexion");
          user_open.innerHTML = "Erreur de connexion, veuillez réessayer.";
      }
 
@@ -366,7 +374,8 @@ async function modalAjoutPhoto() {
     inputSubmit.classList.add("btnValiderAjout");
     inputSubmit.value = "Valider";
     pBtnLine.appendChild(inputSubmit);
-    pBtnLine.appendChild(document.createElement("span"));
+    textError = document.createElement("p")
+    pBtnLine.appendChild(textError);
     form.appendChild(pBtnLine);
 
     gallery.appendChild(form);
@@ -386,12 +395,9 @@ async function modalAjoutPhoto() {
 
     // Validation en temps réel du formulaire
     function validatePhotoForm() {
-        if (
-            inputTitle.value.trim() !== "" &&
-            inputFile.files.length > 0 &&
-            selectCategory.value !== ""
-        ) {
+        if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
             inputSubmit.classList.add("active");
+            textError.textContent = ""
         } else {
             inputSubmit.classList.remove("active");
         }
@@ -399,6 +405,14 @@ async function modalAjoutPhoto() {
 
     form.addEventListener("input", validatePhotoForm);
     form.addEventListener("change", validatePhotoForm);
+    inputSubmit.addEventListener("click",() => {
+        if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
+            return
+        } else{
+            textError.textContent = "Veuillez remplir tout les champs"
+            textError.style.color = "red"
+        }
+        });
 
     updateFocusables();
 }
