@@ -93,66 +93,67 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
 async function filtres() {
     if (window.localStorage.getItem("token")) {
         return;
-    } else {
+    }
     const titre = document.querySelector(".titre_projet");
-    const zoneBtn = document.createElement("div");
+    let zoneBtn = document.querySelector(".zoneBtn");
+    if (zoneBtn) {
+        zoneBtn.remove(); // Pour éviter les doublons si filtres() est rappelée
+    }
+    zoneBtn = document.createElement("div");
     zoneBtn.classList.add("zoneBtn");
+
+    // Récupération des projets
+    const worksData = await fetchData("http://localhost:5678/api/works");
+
+    // Création d'un Set pour stocker les catégories uniques
+    const categoriesSet = new Set();
+    worksData.forEach(article => {
+        categoriesSet.add(article.category.name);
+    });
+
+    // Bouton "Tous"
     const btnTous = document.createElement("button");
-    btnTous.innerHTML = "Tous";
-    btnTous.classList.add("btnTous");
-    const btnObjets = document.createElement("button");
-    btnObjets.classList.add("btnObjets");
-    btnObjets.innerHTML = "Objets";
-    const btnAppartements = document.createElement("button");
-    btnAppartements.innerHTML = "Appartements";
-    btnAppartements.classList.add("btnAppartements");
-    const btnHotelsRestaurants = document.createElement("button");
-    btnHotelsRestaurants.innerHTML = "Hôtels & restaurants";
-    btnHotelsRestaurants.classList.add("btnHotelsRestaurants");
+    btnTous.innerText = "Tous";
+    btnTous.classList.add("btnCategorie");
+    btnTous.classList.add("clickBtn");
+    btnTous.addEventListener("click", function () {
+        const allBtns = document.querySelectorAll(".btnCategorie");
+            allBtns.forEach(b => b.classList.remove("clickBtn"));
 
-    titre.appendChild(zoneBtn);
+        const portfolio = document.getElementById("portfolio");
+        portfolio.innerHTML = "";
+        projets(worksData);
+
+        btnTous.classList.add("clickBtn");
+    });
     zoneBtn.appendChild(btnTous);
-    zoneBtn.appendChild(btnObjets);
-    zoneBtn.appendChild(btnAppartements);
-    zoneBtn.appendChild(btnHotelsRestaurants);
 
-     const worksData = await fetchData("http://localhost:5678/api/works");
-     btnTous.addEventListener("click",  function () {
-         document.getElementById("portfolio").innerHTML = "";
-          projets(worksData);
-          filtres();
-     });
-     btnObjets.addEventListener("click",  function () {
-         document.getElementById("portfolio").innerHTML = "";
-             const objets = worksData.filter(article => article.category.id === 1);
-              projets(objets);
-              filtres();
-     });
-     btnAppartements.addEventListener("click",  function () {
-         document.getElementById("portfolio").innerHTML = "";
-             const appartements = worksData.filter(article => article.category.id === 2);
-              projets(appartements);
-              filtres();
-     });
-     btnHotelsRestaurants.addEventListener("click",  function () {
-         document.getElementById("portfolio").innerHTML = "";
-             const hotelsRestaurants = worksData.filter(article => article.category.id === 3);
-              projets(hotelsRestaurants);
-              filtres();
-     });
-}
+    // Création dynamique des boutons de filtre
+    categoriesSet.forEach(category => {
+        const btn = document.createElement("button");
+        btn.innerText = category;
+        btn.classList.add("btnCategorie");
+        btn.addEventListener("click", function () {
+            const allBtns = document.querySelectorAll(".btnCategorie");
+            allBtns.forEach(b => b.classList.remove("clickBtn"));
+
+            const portfolio = document.getElementById("portfolio");
+            portfolio.innerHTML = "";
+            const filtered = worksData.filter(article => article.category.name === category);
+            projets(filtered);
+
+            btn.classList.add("clickBtn");
+        });
+        zoneBtn.appendChild(btn);
+    });
+    titre.appendChild(zoneBtn);
 }
 /* fonction d'affichage des projets */
 async function projets(worksData) {
     const portfolio = document.getElementById("portfolio");
-    const h2 = document.createElement("h2");
-    h2.classList.add("titre_projet");
-    h2.innerText = "Mes Projets";
-    portfolio.appendChild(h2);
-    const projet = document.createElement("div");
-    projet.classList.add("gallery");
-    portfolio.appendChild(projet);
+    portfolio.classList.add("gallery");
     if (localStorage.getItem("token")) {
+        const h2 = document.querySelector(".titre_projet")
         const divModification = document.createElement("button");
         const pModification = document.createElement("p");
         const iModification = document.createElement("i");
@@ -176,7 +177,7 @@ async function projets(worksData) {
         <img src="${article.imageUrl}" alt="image de ${article.title}">
         <figcaption>${article.title}</figcaption>
         `;
-        projet.appendChild(figure);
+        portfolio.appendChild(figure);
 });
 } catch (error) {
     console.error("Erreur lors de la récupération des projets :", error);
@@ -204,7 +205,7 @@ async function modal(){
 }
 
 /* fonction affichage de la modale d'ajout de photo */
-function modalAjoutPhoto() {
+ async function modalAjoutPhoto() {
       const textTitreModal = document.querySelector(".modal h2");
       const textBtn = document.querySelector(".btnp");
       const gallery = document.querySelector(".ajout_galerie");
@@ -212,10 +213,8 @@ function modalAjoutPhoto() {
       gallery.innerHTML = "";
       textTitreModal.innerHTML = "Ajout photo";
       textBtn.style.display = "none";
-
-
       gallery.classList.add("ajout_projet");
-
+    
         gallery.innerHTML = 
           `
         <i class="fa-solid fa-arrow-left btn-retour-modal" role="button" aria-label="Retour" tabindex="0"></i>
@@ -237,19 +236,33 @@ function modalAjoutPhoto() {
             <p>
             <label for="category">Catégorie</label>
             <select id="category" name="category" required>
-            <option value="1">Objets</option>
-            <option value="2">Appartements</option>
-            <option value="3">Hôtels & Restaurants</option>
+            
             </select>
             </p>
         </div>
             <p class="btnpLine">
-            <input type="submit" class="btnValiderAjout" value="Valider""/>
+            <input type="submit" class="btnValiderAjout" value="Valider"/>
             </p>
 
             </form>
 
           `;
+            try {
+       const response = await fetchData("http://localhost:5678/api/categories");
+       const category = document.querySelector("#form-ajout-photo #category")
+
+        response.forEach(categories => {
+            const option = document.createElement("option");
+            option.value = categories.id
+            option.textContent = categories.name
+            category.appendChild(option)
+        })
+  
+  
+        } catch (error) {
+         console.error("Erreur lors de la récupération des projets :", error);
+    
+        }
        // Fonction de validation en temps réel du formulaire
     function validatePhotoForm() {
         const titleInput = document.getElementById("title");
@@ -376,6 +389,8 @@ document.body.addEventListener("click", function(e) {
             window.localStorage.clear()
             window.location.reload();
         } else {
+            const userOpen = document.querySelector("#user_open")
+            userOpen.classList.toggle("click");
             // Afficher la modale de connexion
             toggleMenu()
         }

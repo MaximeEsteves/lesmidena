@@ -126,6 +126,7 @@ li:hover {
 /* zone de modification */
 .titre_projet{
 	position: relative;
+	text-align: center;
 }
 .div_modification {
 	color: black;
@@ -224,7 +225,7 @@ li:hover {
 	margin: 40px;
 }
 
-.zoneBtn button{
+.btnCategorie{
 	background-color: white;
 	border: 1px solid #1D6154;
 	color: #1D6154;
@@ -233,7 +234,7 @@ li:hover {
 	font-size: 16px;
 	padding: 10px 20px;
 }
-.zoneBtn button:hover{
+.btnCategorie:hover{
 	background-color: #1D6154;
 	border: 1px solid #1D6154;
 	color: white;
@@ -470,6 +471,11 @@ footer nav ul {
 	color: #1D6154;
 	cursor: pointer;
 }
-#user_open:active{
-	color: green;
+.click{
+	font-weight:600;
+}
+.clickBtn{
+	background-color: #1D6154;
+	color: white;
+	border: 1px solid white;
 }
