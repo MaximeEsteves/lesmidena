@@ -83,7 +83,7 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
      } else {
          const user_open = document.querySelector(".zone_connexion p");
          user_open.innerHTML = "Erreur de connexion, veuillez réessayer.";
-         console.log("nnnooooooooo");
+         //console.log("nnnooooooooo");
          
      }
 
@@ -199,7 +199,7 @@ async function modal(){
           gallery.appendChild(figure);
   });
   const modal = document.querySelector(".modal");
-    focusables = Array.from(modal.querySelectorAll(focusableSelector));
+    focusables = Array.from(modal.querySelectorAll(focusableSelector))
     
 }
 
@@ -270,7 +270,7 @@ function modalAjoutPhoto() {
         formEl.addEventListener("input", validatePhotoForm);
         formEl.addEventListener("change", validatePhotoForm);
     }
-       
+    updateFocusables()
 }
 
 //* Fonction retour de la modale */
@@ -311,6 +311,7 @@ async function deletePhoto(figure) {
         portfolio.innerHTML = ""
         projets();
     } 
+    updateFocusables()
 }
 
 // fonction ajout d'un nouveau projet
@@ -433,10 +434,6 @@ window.addEventListener("keydown", function(e) {
     if (target && e.key === "Enter") {
         retourModal();
     }
-    const userOpen = document.getElementById("user_open");
-    if (userOpen && e.key === "Enter") {
-        toggleMenu();
-    }
     // Exécuter le focus trap uniquement si la modale est visible
     if (e.key === "Tab") {
         // Vérifier si la modale est ouverte (par exemple, mode flex ou autre)
@@ -467,4 +464,10 @@ const focusInModal = function (e) {
 
     focusables[index].focus();
     
+}
+
+function updateFocusables() {
+    const modal = document.querySelector(".modal");
+    focusables = Array.from(modal.querySelectorAll(focusableSelector))
+        .filter(el => !el.disabled && el.offsetParent !== null);
 }
