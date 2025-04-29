@@ -19,34 +19,73 @@ projets();
 filtres();
 modal();
 
-/* Modification du login suivant le localStorage */
-if (window.localStorage.getItem("token")) {
-    const user_open = document.getElementById("user_open");
-    user_open.innerHTML = "log out";
-}
+
 
 /* fonction d'affichage du login */
 function toggleMenu() {
     const main = document.querySelector("main");
     let menu = document.getElementById("menu-login");
-    
+
     if (!menu) {
         // Création du menu de connexion s'il n'existe pas encore
         menu = document.createElement("div");
         menu.setAttribute("id", "menu-login");
-        menu.innerHTML = `
-            <h2>Log in</h2>
-            <form action="#" method="post" id="menu-connexion">
-                <label for="email">E-mail</label>
-                <input type="email" name="email" id="email">
-                <label for="password">Mot de passe</label>
-                <input type="password" name="password" id="password">
-                <input type="submit" class="btnConnexion" value="Se connecter" >
-            </form>
-            <p><p>
-            <p><a href="#">Mot de passe oublié</a></p>
-        `;
-           menu.classList.add("zone_connexion");
+        menu.classList.add("zone_connexion");
+
+        // Titre
+        const h2 = document.createElement("h2");
+        h2.textContent = "Log in";
+        menu.appendChild(h2);
+
+        // Formulaire
+        const form = document.createElement("form");
+        form.setAttribute("action", "#");
+        form.setAttribute("method", "post");
+        form.setAttribute("id", "menu-connexion");
+
+        // Label Email
+        const labelEmail = document.createElement("label");
+        labelEmail.setAttribute("for", "email");
+        labelEmail.textContent = "E-mail";
+        form.appendChild(labelEmail);
+
+        // Input Email
+        const inputEmail = document.createElement("input");
+        inputEmail.type = "email";
+        inputEmail.name = "email";
+        inputEmail.id = "email";
+        form.appendChild(inputEmail);
+
+        // Label Password
+        const labelPassword = document.createElement("label");
+        labelPassword.setAttribute("for", "password");
+        labelPassword.textContent = "Mot de passe";
+        form.appendChild(labelPassword);
+
+        // Input Password
+        const inputPassword = document.createElement("input");
+        inputPassword.type = "password";
+        inputPassword.name = "password";
+        inputPassword.id = "password";
+        form.appendChild(inputPassword);
+
+        // Bouton Connexion
+        const inputSubmit = document.createElement("input");
+        inputSubmit.type = "submit";
+        inputSubmit.classList.add("btnConnexion");
+        inputSubmit.value = "Se connecter";
+        form.appendChild(inputSubmit);
+
+        menu.appendChild(form);
+
+        // Lien mot de passe oublié
+        const p = document.createElement("p");
+        const a = document.createElement("a");
+        a.href = "#";
+        a.textContent = "Mot de passe oublié";
+        p.appendChild(a);
+        menu.appendChild(p);
+
         // Masquer le contenu de base au lieu de le supprimer
         const baseContent = document.getElementById("base-content");
         if (baseContent) {
@@ -83,8 +122,6 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
      } else {
          const user_open = document.querySelector(".zone_connexion p");
          user_open.innerHTML = "Erreur de connexion, veuillez réessayer.";
-         //console.log("nnnooooooooo");
-         
      }
 
 }
@@ -167,18 +204,24 @@ async function projets(worksData) {
         divModification.appendChild(pModification);
         h2.appendChild(divModification);
     }
+ 
     try {
         const works = worksData || await fetchData("http://localhost:5678/api/works");
         works.forEach(article => {
-        const figure = document.createElement("figure");
-        figure.dataset.id = article.id;
-        figure.innerHTML = 
-        `
-        <img src="${article.imageUrl}" alt="image de ${article.title}">
-        <figcaption>${article.title}</figcaption>
-        `;
-        portfolio.appendChild(figure);
-});
+            const figure = document.createElement("figure");
+            figure.dataset.id = article.id;
+
+            const img = document.createElement("img");
+            img.src = article.imageUrl;
+            img.alt = `image de ${article.title}`;
+            figure.appendChild(img);
+
+            const figcaption = document.createElement("figcaption");
+            figcaption.textContent = article.title;
+            figure.appendChild(figcaption);
+
+            portfolio.appendChild(figure);
+        });
 } catch (error) {
     console.error("Erreur lors de la récupération des projets :", error);
 
@@ -189,101 +232,175 @@ async function projets(worksData) {
 async function modal(){
     const gallery = document.querySelector(".ajout_galerie");
     const worksData = await fetchData("http://localhost:5678/api/works");
-      worksData.forEach(article => {
-          const figure = document.createElement("figure");
-          figure.dataset.id = article.id;
-          figure.innerHTML = 
-          `
-          <img src="${article.imageUrl}" alt="image de ${article.title}">
-          <button class="icone_supprimer"><i class="fa-solid fa-trash-can"></i></button>
-          `;
-          gallery.appendChild(figure);
-  });
-  const modal = document.querySelector(".modal");
-    focusables = Array.from(modal.querySelectorAll(focusableSelector))
+
+    worksData.forEach(article => {
+        const figure = document.createElement("figure");
+        figure.dataset.id = article.id;
+
+        const img = document.createElement("img");
+        img.src = article.imageUrl;
+        img.alt = `image de ${article.title}`;
+        figure.appendChild(img);
+
+        const btnSupprimer = document.createElement("button");
+        btnSupprimer.classList.add("icone_supprimer");
+
+        const icon = document.createElement("i");
+        icon.classList.add("fa-solid", "fa-trash-can");
+
+        btnSupprimer.appendChild(icon);
+        figure.appendChild(btnSupprimer);
+
+        gallery.appendChild(figure);
+    });
+    
+    // Mise à jour de la liste des éléments focusables dans la modale
+    const modal = document.querySelector(".modal");
+    focusables = Array.from(modal.querySelectorAll(focusableSelector));
     
 }
 
 /* fonction affichage de la modale d'ajout de photo */
- async function modalAjoutPhoto() {
-      const textTitreModal = document.querySelector(".modal h2");
-      const textBtn = document.querySelector(".btnp");
-      const gallery = document.querySelector(".ajout_galerie");
+async function modalAjoutPhoto() {
+    const textTitreModal = document.querySelector(".modal h2");
+    const textBtn = document.querySelector(".btnp");
+    const gallery = document.querySelector(".ajout_galerie");
 
-      gallery.innerHTML = "";
-      textTitreModal.innerHTML = "Ajout photo";
-      textBtn.style.display = "none";
-      gallery.classList.add("ajout_projet");
-    
-        gallery.innerHTML = 
-          `
-        <i class="fa-solid fa-arrow-left btn-retour-modal" role="button" aria-label="Retour" tabindex="0"></i>
-        <form id="form-ajout-photo" enctype="multipart/form-data">
-        <div class="formulaire_photo">
-        <label class="custom-file-upload">
-            <img src="" id="preview"style="display:none" alt="aperçu"/>
-            <i class="fa-solid fa-image picture_file"></i>
-            <span class="btn-text">+ Ajouter une photo</span>
-            <span class="file-info">jpg, png : 4 Mo max</span>
-            <input id="file-upload" name="image" type="file" onchange="previewFile()" required /> 
-            </label>
+    // Nettoyage et configuration
+    gallery.innerHTML = "";
+    textTitreModal.innerHTML = "Ajout photo";
+    textBtn.style.display = "none";
+    gallery.classList.add("ajout_projet");
 
-            <p>
-            <label for="title">Titre</label>
-            <input type="text" id="title" name="title" maxlength="32" required />
-            </p>
+    // Bouton retour
+    const btnRetour = document.createElement("i");
+    btnRetour.classList.add("fa-solid", "fa-arrow-left", "btn-retour-modal");
+    btnRetour.setAttribute("role", "button");
+    btnRetour.setAttribute("aria-label", "Retour");
+    btnRetour.setAttribute("tabindex", "0");
+    gallery.appendChild(btnRetour);
 
-            <p>
-            <label for="category">Catégorie</label>
-            <select id="category" name="category" required>
-            
-            </select>
-            </p>
-        </div>
-            <p class="btnpLine">
-            <input type="submit" class="btnValiderAjout" value="Valider"/>
-            </p>
+    // Formulaire
+    const form = document.createElement("form");
+    form.setAttribute("id", "form-ajout-photo");
+    form.setAttribute("enctype", "multipart/form-data");
 
-            </form>
+    // Conteneur du formulaire
+    const divForm = document.createElement("div");
+    divForm.classList.add("formulaire_photo");
 
-          `;
-            try {
-       const response = await fetchData("http://localhost:5678/api/categories");
-       const category = document.querySelector("#form-ajout-photo #category")
+    // Label custom file upload
+    const labelFile = document.createElement("label");
+    labelFile.classList.add("custom-file-upload");
 
+    // Image preview
+    const imgPreview = document.createElement("img");
+    imgPreview.id = "preview";
+    imgPreview.style.display = "none";
+    imgPreview.alt = "aperçu";
+    labelFile.appendChild(imgPreview);
+
+    // Icône image
+    const icone = document.createElement("i");
+    icone.classList.add("fa-solid", "fa-image", "picture_file");
+    labelFile.appendChild(icone);
+
+    // Texte bouton
+    const spanBtnText = document.createElement("span");
+    spanBtnText.classList.add("btn-text");
+    spanBtnText.textContent = "+ Ajouter une photo";
+    labelFile.appendChild(spanBtnText);
+
+    // Infos fichier
+    const spanFileInfo = document.createElement("span");
+    spanFileInfo.classList.add("file-info");
+    spanFileInfo.textContent = "jpg, png : 4 Mo max";
+    labelFile.appendChild(spanFileInfo);
+
+    // Input file
+    const inputFile = document.createElement("input");
+    inputFile.id = "file-upload";
+    inputFile.name = "image";
+    inputFile.type = "file";
+    inputFile.required = true;
+    inputFile.onchange = previewFile;
+    labelFile.appendChild(inputFile);
+
+    divForm.appendChild(labelFile);
+
+    // Titre
+    const pTitle = document.createElement("p");
+    const labelTitle = document.createElement("label");
+    labelTitle.setAttribute("for", "title");
+    labelTitle.textContent = "Titre";
+    const inputTitle = document.createElement("input");
+    inputTitle.type = "text";
+    inputTitle.id = "title";
+    inputTitle.name = "title";
+    inputTitle.maxLength = 32;
+    inputTitle.required = true;
+    labelTitle.appendChild(inputTitle);
+    pTitle.appendChild(labelTitle);
+    divForm.appendChild(pTitle);
+
+    // Catégorie
+    const pCategory = document.createElement("p");
+    const labelCategory = document.createElement("label");
+    labelCategory.setAttribute("for", "category");
+    labelCategory.textContent = "Catégorie";
+    const selectCategory = document.createElement("select");
+    selectCategory.id = "category";
+    selectCategory.name = "category";
+    selectCategory.required = true;
+    labelCategory.appendChild(selectCategory);
+    pCategory.appendChild(labelCategory);
+    divForm.appendChild(pCategory);
+
+    form.appendChild(divForm);
+
+    // Ligne bouton valider
+    const pBtnLine = document.createElement("p");
+    pBtnLine.classList.add("btnpLine");
+    const inputSubmit = document.createElement("input");
+    inputSubmit.type = "submit";
+    inputSubmit.classList.add("btnValiderAjout");
+    inputSubmit.value = "Valider";
+    pBtnLine.appendChild(inputSubmit);
+    pBtnLine.appendChild(document.createElement("span"));
+    form.appendChild(pBtnLine);
+
+    gallery.appendChild(form);
+
+    // Remplir les catégories
+    try {
+        const response = await fetchData("http://localhost:5678/api/categories");
         response.forEach(categories => {
             const option = document.createElement("option");
-            option.value = categories.id
-            option.textContent = categories.name
-            category.appendChild(option)
-        })
-  
-  
-        } catch (error) {
-         console.error("Erreur lors de la récupération des projets :", error);
-    
-        }
-       // Fonction de validation en temps réel du formulaire
+            option.value = categories.id;
+            option.textContent = categories.name;
+            selectCategory.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des projets :", error);
+    }
+
+    // Validation en temps réel du formulaire
     function validatePhotoForm() {
-        const titleInput = document.getElementById("title");
-        const fileInput = document.getElementById("file-upload");
-        const btnValidation = document.querySelector(".ajout_projet .btnValiderAjout")
-        if (titleInput && fileInput) {
-            if (titleInput.value.trim() !== "" && fileInput.files.length > 0) {
-                btnValidation.classList.add("active")
-            } else {
-                btnValidation.classList.remove("active")
-            }
+        if (
+            inputTitle.value.trim() !== "" &&
+            inputFile.files.length > 0 &&
+            selectCategory.value !== ""
+        ) {
+            inputSubmit.classList.add("active");
+        } else {
+            inputSubmit.classList.remove("active");
         }
     }
 
-    // Attacher les écouteurs sur le formulaire pour détecter les changements
-    const formEl = document.getElementById("form-ajout-photo");
-    if (formEl) {
-        formEl.addEventListener("input", validatePhotoForm);
-        formEl.addEventListener("change", validatePhotoForm);
-    }
-    updateFocusables()
+    form.addEventListener("input", validatePhotoForm);
+    form.addEventListener("change", validatePhotoForm);
+
+    updateFocusables();
 }
 
 //* Fonction retour de la modale */
@@ -485,4 +602,21 @@ function updateFocusables() {
     const modal = document.querySelector(".modal");
     focusables = Array.from(modal.querySelectorAll(focusableSelector))
         .filter(el => !el.disabled && el.offsetParent !== null);
+}
+
+/* Modification du login suivant le localStorage */
+if (window.localStorage.getItem("token")) {
+    const user_open = document.getElementById("user_open");
+    user_open.innerHTML = "log out";
+    const modeEdition = document.createElement("div");
+    const iconeEdition = document.createElement("i");
+    const texteEdition = document.createElement("p");
+    const body = document.querySelector("body");
+    modeEdition.classList.add("mode_edition");
+    iconeEdition.classList.add("fa-solid", "fa-pen-to-square");
+    texteEdition.textContent = "Mode édition";
+    body.style.marginTop = "59px";
+    modeEdition.appendChild(iconeEdition);
+    modeEdition.appendChild(texteEdition);
+    body.appendChild(modeEdition);
 }

@@ -479,3 +479,18 @@ footer nav ul {
 	color: white;
 	border: 1px solid white;
 }
+
+/* mode edition */
+.mode_edition{
+position: absolute;
+left: 0;
+top: 0;
+height: 59px;
+width: 100%;
+background-color: black;
+color: white;
+display:flex;
+justify-content: center;
+align-items: center;
+gap: 10px;
+}
