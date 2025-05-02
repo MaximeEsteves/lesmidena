@@ -200,7 +200,7 @@ async function projets(worksData) {
     if (localStorage.getItem("token")) {
         const h2 = document.querySelector(".titre_projet")
         const divModification = document.createElement("button");
-        const pModification = document.createElement("p");
+        const pModification = document.createElement("span");
         const iModification = document.createElement("i");
 
         h2.style.marginBottom = "80px";
@@ -374,7 +374,7 @@ async function modalAjoutPhoto() {
     inputSubmit.classList.add("btnValiderAjout");
     inputSubmit.value = "Valider";
     pBtnLine.appendChild(inputSubmit);
-    textError = document.createElement("p")
+    textError = document.createElement("span")
     pBtnLine.appendChild(textError);
     form.appendChild(pBtnLine);
 

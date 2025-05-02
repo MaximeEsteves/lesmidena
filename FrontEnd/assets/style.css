@@ -216,6 +216,10 @@ li:hover {
 	text-align: center;
 	margin-bottom: 1em;
 }
+#portfolio {
+	
+	padding: 10px;
+}
 
 /* zone filtres */
 .zoneBtn{
@@ -248,43 +252,6 @@ li:hover {
 }
 .gallery img {
 	width: 100%;
-}
-
-#contact {
-	width: 50%;
-margin: auto;
-}
-#contact > * {
-	text-align: center;
-
-}
-#contact h2{
-	margin-bottom: 20px;
-}
-#contact form {
-	text-align: left;
-	margin-top:30px;
-	display: flex;
-	flex-direction: column;
-}
-
-#contact input {
-	height: 50px;
-	font-size: 1.2em;
-	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
-	border: none;
-}
-#contact label {
-	margin: 2em 0 1em 0;
-}
-#contact textarea {
-	border: none;
-	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
-}
-footer nav ul {
-	display: flex;
-	justify-content: flex-end;
-	margin: 2em
 }
 
 /* zone_connexion */
@@ -320,6 +287,12 @@ footer nav ul {
 }
 #user_open{
 	cursor: pointer;
+	border: none;
+	background-color: white;
+	font-family: Work Sans;
+	font-weight: 400;
+	font-size: 16px;
+
 }
 
 
@@ -496,3 +469,88 @@ justify-content: center;
 align-items: center;
 gap: 10px;
 }
+
+/* zone contact */
+#contact {
+	width: 50%;
+margin: auto;
+}
+#contact > * {
+	text-align: center;
+
+}
+#contact h2{
+	margin-bottom: 20px;
+}
+#contact form {
+	text-align: left;
+	margin-top:30px;
+	display: flex;
+	flex-direction: column;
+}
+
+#contact input {
+	height: 50px;
+	font-size: 1.2em;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	border: none;
+}
+#contact label {
+	margin: 2em 0 1em 0;
+}
+#contact textarea {
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+}
+footer nav ul {
+	display: flex;
+	justify-content: flex-end;
+	margin: 2em
+}
+
+/* media queries */
+@media (max-width: 768px) {
+	#introduction{
+		flex-direction: column;
+	}
+	#introduction article {
+		margin:40px;
+	}
+	#introduction article h2{
+		text-align: center;
+	}
+	.div_modification {
+		position: inherit;
+		background-color: initial;
+		left: inherit;
+		justify-content: center;
+		align-items: center;
+	}
+	.titre_projet{
+		display: flex;
+		flex-direction: column;
+	}
+	#portfolio {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+ }
+ @media (max-width: 580px) {
+	.zoneBtn{
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+}
+ 
+
+@media (max-width: 425px) {
+	header {
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+	}
+	#portfolio {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+ }
