@@ -101,6 +101,9 @@ function toggleMenu() {
         }
         // Afficher le menu
         main.appendChild(menu);
+
+        const userOpen = document.getElementById("user_open");
+        userOpen.style.fontWeight = "700"
     } else {
         // Masquer le menu et réafficher le contenu de base
         menu.remove();
@@ -108,6 +111,8 @@ function toggleMenu() {
         if (baseContent) {
             baseContent.classList.remove("hidden");
         }
+        const userOpen = document.getElementById("user_open");
+        userOpen.style.fontWeight = "400"
     }
 }
 
@@ -129,7 +134,7 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
          window.location.reload();
      } else {
          const user_open = document.querySelector(".text_error_connexion");
-         user_open.innerHTML = "Erreur de connexion, veuillez réessayer.";
+         user_open.innerHTML = "Erreur dans l’identifiant ou le mot de passe";
      }
 
 }
