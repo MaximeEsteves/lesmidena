@@ -1,17 +1,15 @@
 const focusableSelector = 'a, textarea, button, i[tabindex], input, select';
 let focusables = [];
 let previousActiveElement = null;
-/* appel de l'API pour récupérer les projets */
+
 const fetchData = async (url, options = {}) => {
     try {
         const res = await fetch(url, options);
 		if (res.ok) {
 			const data = await res.json()
-			//console.log(data)
 			return data
 		}
 	} catch (error) {
-        console.error("error", error.message)
         return error
 	}
 }
@@ -30,7 +28,7 @@ function toggleMenu() {
         // Création du menu de connexion s'il n'existe pas encore
         menu = document.createElement("div");
         menu.setAttribute("id", "menu-login");
-        menu.classList.add("zone_connexion");
+        menu.classList.add("zone-connexion");
 
         // Titre
         const h2 = document.createElement("h2");
@@ -72,7 +70,7 @@ function toggleMenu() {
         // Bouton Connexion
         const inputSubmit = document.createElement("input");
         inputSubmit.type = "submit";
-        inputSubmit.classList.add("btnConnexion");
+        inputSubmit.classList.add("btn-connexion");
         inputSubmit.value = "Se connecter";
         form.appendChild(inputSubmit);
 
@@ -80,7 +78,7 @@ function toggleMenu() {
 
         // Error connexion
         const textError = document.createElement("p");
-        textError.classList.add("text_error_connexion");
+        textError.classList.add("text-error-connexion");
         textError.textContent = "";
         textError.style.color = "red"
 
@@ -102,7 +100,7 @@ function toggleMenu() {
         // Afficher le menu
         main.appendChild(menu);
 
-        const userOpen = document.getElementById("user_open");
+        const userOpen = document.getElementById("user-open");
         userOpen.style.fontWeight = "700"
     } else {
         // Masquer le menu et réafficher le contenu de base
@@ -111,7 +109,7 @@ function toggleMenu() {
         if (baseContent) {
             baseContent.classList.remove("hidden");
         }
-        const userOpen = document.getElementById("user_open");
+        const userOpen = document.getElementById("user-open");
         userOpen.style.fontWeight = "400"
     }
 }
@@ -129,12 +127,12 @@ const data = await fetchData("http://localhost:5678/api/users/login", {
 });
      if (data && data.token) {
          window.localStorage.setItem("token", data.token);
-         const user_open = document.getElementById("user_open");
-         user_open.innerHTML = "log out";
+         const userOpen = document.getElementById("user-open");
+         userOpen.innerHTML = "log out";
          window.location.reload();
      } else {
-         const user_open = document.querySelector(".text_error_connexion");
-         user_open.innerHTML = "Erreur dans l’identifiant ou le mot de passe";
+         const userOpen = document.querySelector(".text-error-connexion");
+         userOpen.innerHTML = "Erreur dans l’identifiant ou le mot de passe";
      }
 
 }
@@ -144,13 +142,13 @@ async function filtres() {
     if (window.localStorage.getItem("token")) {
         return;
     }
-    const titre = document.querySelector(".titre_projet");
-    let zoneBtn = document.querySelector(".zoneBtn");
+    const titre = document.querySelector(".titre-projet");
+    let zoneBtn = document.querySelector(".zone-btn");
     if (zoneBtn) {
         zoneBtn.remove(); // Pour éviter les doublons si filtres() est rappelée
     }
     zoneBtn = document.createElement("div");
-    zoneBtn.classList.add("zoneBtn");
+    zoneBtn.classList.add("zone-btn");
 
     // Récupération des projets
     const worksData = await fetchData("http://localhost:5678/api/works");
@@ -164,17 +162,17 @@ async function filtres() {
     // Bouton "Tous"
     const btnTous = document.createElement("button");
     btnTous.innerText = "Tous";
-    btnTous.classList.add("btnCategorie");
-    btnTous.classList.add("clickBtn");
+    btnTous.classList.add("btn-categorie");
+    btnTous.classList.add("click-btn");
     btnTous.addEventListener("click", function () {
-        const allBtns = document.querySelectorAll(".btnCategorie");
-            allBtns.forEach(b => b.classList.remove("clickBtn"));
+        const allBtns = document.querySelectorAll(".btn-categorie");
+            allBtns.forEach(b => b.classList.remove("click-btn"));
 
         const portfolio = document.getElementById("portfolio");
         portfolio.innerHTML = "";
         projets(worksData);
 
-        btnTous.classList.add("clickBtn");
+        btnTous.classList.add("click-btn");
     });
     zoneBtn.appendChild(btnTous);
 
@@ -182,17 +180,17 @@ async function filtres() {
     categoriesSet.forEach(category => {
         const btn = document.createElement("button");
         btn.innerText = category;
-        btn.classList.add("btnCategorie");
+        btn.classList.add("btn-categorie");
         btn.addEventListener("click", function () {
-            const allBtns = document.querySelectorAll(".btnCategorie");
-            allBtns.forEach(b => b.classList.remove("clickBtn"));
+            const allBtns = document.querySelectorAll(".btn-categorie");
+            allBtns.forEach(b => b.classList.remove("click-btn"));
 
             const portfolio = document.getElementById("portfolio");
             portfolio.innerHTML = "";
             const filtered = worksData.filter(article => article.category.name === category);
             projets(filtered);
 
-            btn.classList.add("clickBtn");
+            btn.classList.add("click-btn");
         });
         zoneBtn.appendChild(btn);
     });
@@ -203,7 +201,7 @@ async function projets(worksData) {
     const portfolio = document.getElementById("portfolio");
     portfolio.classList.add("gallery");
     if (localStorage.getItem("token")) {
-        const h2 = document.querySelector(".titre_projet")
+        const h2 = document.querySelector(".titre-projet")
         const divModification = document.createElement("button");
         const pModification = document.createElement("span");
         const iModification = document.createElement("i");
@@ -211,7 +209,7 @@ async function projets(worksData) {
         h2.style.marginBottom = "80px";
         pModification.innerHTML = "Modifier";
         iModification.classList.add("fa-solid", "fa-pen-to-square");
-        divModification.classList.add("div_modification");
+        divModification.classList.add("div-modification");
 
         divModification.appendChild(iModification);
         divModification.appendChild(pModification);
@@ -236,14 +234,13 @@ async function projets(worksData) {
             portfolio.appendChild(figure);
         });
 } catch (error) {
-    console.error("Erreur lors de la récupération des projets :", error);
 
 }
 }
 
 //* fonction contenu de la modale Galarie Photo */
 async function modal(){
-    const gallery = document.querySelector(".ajout_galerie");
+    const gallery = document.querySelector(".ajout-galerie");
     const worksData = await fetchData("http://localhost:5678/api/works");
 
     worksData.forEach(article => {
@@ -256,7 +253,7 @@ async function modal(){
         figure.appendChild(img);
 
         const btnSupprimer = document.createElement("button");
-        btnSupprimer.classList.add("icone_supprimer");
+        btnSupprimer.classList.add("icone-supprimer");
 
         const icon = document.createElement("i");
         icon.classList.add("fa-solid", "fa-trash-can");
@@ -277,13 +274,13 @@ async function modal(){
 async function modalAjoutPhoto() {
     const textTitreModal = document.querySelector(".modal h2");
     const textBtn = document.querySelector(".btnp");
-    const gallery = document.querySelector(".ajout_galerie");
+    const gallery = document.querySelector(".ajout-galerie");
 
     // Nettoyage et configuration
     gallery.innerHTML = "";
     textTitreModal.innerHTML = "Ajout photo";
     textBtn.style.display = "none";
-    gallery.classList.add("ajout_projet");
+    gallery.classList.add("ajout-projet");
 
     // Bouton retour
     const btnRetour = document.createElement("i");
@@ -300,7 +297,7 @@ async function modalAjoutPhoto() {
 
     // Conteneur du formulaire
     const divForm = document.createElement("div");
-    divForm.classList.add("formulaire_photo");
+    divForm.classList.add("formulaire-photo");
 
     // Label custom file upload
     const labelFile = document.createElement("label");
@@ -315,7 +312,7 @@ async function modalAjoutPhoto() {
 
     // Icône image
     const icone = document.createElement("i");
-    icone.classList.add("fa-solid", "fa-image", "picture_file");
+    icone.classList.add("fa-solid", "fa-image", "picture-file");
     labelFile.appendChild(icone);
 
     // Texte bouton
@@ -373,13 +370,14 @@ async function modalAjoutPhoto() {
 
     // Ligne bouton valider
     const pBtnLine = document.createElement("p");
-    pBtnLine.classList.add("btnpLine");
+    pBtnLine.classList.add("btnp-line");
     const inputSubmit = document.createElement("input");
     inputSubmit.type = "submit";
-    inputSubmit.classList.add("btnValiderAjout");
+    inputSubmit.classList.add("btn-valider-ajout");
     inputSubmit.value = "Valider";
     pBtnLine.appendChild(inputSubmit);
     textError = document.createElement("span")
+    textError.classList.add("text-error-add-photo")
     pBtnLine.appendChild(textError);
     form.appendChild(pBtnLine);
 
@@ -395,7 +393,6 @@ async function modalAjoutPhoto() {
             selectCategory.appendChild(option);
         });
     } catch (error) {
-        console.error("Erreur lors de la récupération des projets :", error);
     }
 
     // Validation en temps réel du formulaire
@@ -426,19 +423,19 @@ async function modalAjoutPhoto() {
 function retourModal() {
             const textTitreModal = document.querySelector(".modal h2");
             const textBtn = document.querySelector(".btnp");
-            const gallery = document.querySelector(".ajout_galerie");
+            const gallery = document.querySelector(".ajout-galerie");
 
             gallery.innerHTML = "";
             textTitreModal.innerHTML = "Galerie photo";
             textBtn.style.display = "flex";
-            gallery.classList.remove("ajout_projet");
+            gallery.classList.remove("ajout-projet");
             modal();
 }
 
 //* Fonction fermeture de la modale */
 function closeModal() {
         const modal = document.querySelector(".modal");
-        const modalContent = document.querySelector(".modal_content");
+        const modalContent = document.querySelector(".modal-content");
         modal.style.display = "none";
         modalContent.style.display = "none";
 }
@@ -467,7 +464,6 @@ async function deletePhoto(figure) {
 async function addPhoto(){
     const formEl = document.querySelector('#form-ajout-photo');
     const token = window.localStorage.getItem("token");
-    // Construction du FormData à partir du <form> (formEl) (prend en compte tous les name=... du form)
     const formData = new FormData(formEl);
 
     const response = await fetch('http://localhost:5678/api/works/', {
@@ -493,12 +489,34 @@ async function addPhoto(){
 
 // fonction modification du 'File' dans la modale 'ajoutPhotos'
 function previewFile() {
-        const icone = document.querySelector(".picture_file");
+    const file = document.querySelector("input[type=file]").files[0];
+    const textError = document.querySelector(".text-error-add-photo");
+
+    if (file) {
+        if (file.size > 4 * 1024 * 1024) {
+            textError.innerText = "Le fichier dépasse la limite de 4 Mo."
+            textError.style.color = "red"
+            return;
+        } else {
+            textError.innerText = ""
+        }
+
+        const allowedTypes = ["image/jpeg", "image/png"];
+        if (!allowedTypes.includes(file.type)) {
+            textError.innerText = "Seuls les fichiers JPG et PNG sont autorisés."
+            textError.style.color = "red"
+            return;
+        } else {
+            textError.innerText = ""
+        }
+    }
+
+        const icone = document.querySelector(".picture-file");
         const preview = document.querySelector("#preview");
         const fileInfo = document.querySelector(".file-info");
         const btnText = document.querySelector(".btn-text");
-        const file = document.querySelector("input[type=file]").files[0];
         const reader = new FileReader();
+
         preview.style.display = "block";
         icone.style.display = "none";
         fileInfo.style.display = "none";
@@ -518,20 +536,20 @@ function previewFile() {
 
 // eventListener "click"
 document.body.addEventListener("click", function(e) {
-    if (e.target.closest("#user_open")) {
+    if (e.target.closest("#user-open")) {
         if (window.localStorage.getItem("token")) {
-            const userOpen = document.querySelector("#user_open")
+            const userOpen = document.querySelector("#user-open")
             userOpen.innerHTML = "login"
             window.localStorage.clear()
             window.location.reload();
         } else {
-            const userOpen = document.querySelector("#user_open")
+            const userOpen = document.querySelector("#user-open")
             userOpen.classList.toggle("click");
             // Afficher la modale de connexion
             toggleMenu()
         }
     }
-    if (e.target.closest(".btn_ajout")) {
+    if (e.target.closest(".btn-ajout")) {
         // Afficher la modale ajout photo
         modalAjoutPhoto();
     }
@@ -539,25 +557,25 @@ document.body.addEventListener("click", function(e) {
         // Retour : Ajouter une photo de la modale 
         retourModal();
     }
-    if (e.target.closest(".btn_close")) {
+    if (e.target.closest(".btn-close")) {
         // Fermeture de la modale 
         retourModal();
         closeModal();
     }
-    const modalContent = document.querySelector(".modal_content");
+    const modalContent = document.querySelector(".modal-content");
     if (e.target === modalContent) {
         // au clic en dehors de la modale, ferme la modale
       closeModal();
     }
-    if (e.target.closest(".icone_supprimer")) {
+    if (e.target.closest(".icone-supprimer")) {
         const figure = e.target.closest("figure");
         // Suppression d'une photo 
         deletePhoto(figure);
     }
-    if (e.target.closest(".div_modification")) {
+    if (e.target.closest(".div-modification")) {
         // Affichage de la modale de la galerie photo
         const modal = document.querySelector(".modal");
-        const modalContent = document.querySelector(".modal_content");
+        const modalContent = document.querySelector(".modal-content");
         modal.style.display = "flex";
         modalContent.style.display = "flex";
     }
@@ -625,13 +643,13 @@ function updateFocusables() {
 
 /* Modification du login suivant le localStorage */
 if (window.localStorage.getItem("token")) {
-    const user_open = document.getElementById("user_open");
-    user_open.innerHTML = "log out";
+    const userOpen = document.getElementById("user-open");
+    userOpen.innerHTML = "log out";
     const modeEdition = document.createElement("div");
     const iconeEdition = document.createElement("i");
     const texteEdition = document.createElement("p");
     const body = document.querySelector("body");
-    modeEdition.classList.add("mode_edition");
+    modeEdition.classList.add("mode-edition");
     iconeEdition.classList.add("fa-solid", "fa-pen-to-square");
     texteEdition.textContent = "Mode édition";
     body.style.marginTop = "59px";
