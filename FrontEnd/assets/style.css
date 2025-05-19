@@ -1,34 +1,12 @@
-/* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
-*/
-
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
+html{
 	margin: 0;
 	padding: 0;
 	border: 0;
 	font-size: 100%;
-	font: inherit;
-	vertical-align: baseline;
 	scroll-behavior: smooth;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-	display: block;
-}
+
 body {
 	line-height: 1;
 }
@@ -49,9 +27,9 @@ table {
 }
 /** end reset css**/
 body {
-	max-width: 1140px;
-	margin:auto;
-	font-family: 'Work Sans' ;
+	max-width: 1920px;
+	margin:0;
+	padding:0;
 	font-size: 14px;
 	display: flex;
 	flex-direction: column;
@@ -59,75 +37,252 @@ body {
 header {
 	display: flex;
 	justify-content: space-between;
-	margin: 50px 0
 }
-section {
-	margin: 50px 0
-}
-
 h1{
-	display: flex;
-	flex-direction: column;
-	font-family: 'Syne';
+	font-family: 'Playfair Display', serif;
 	font-size: 22px;
-	font-weight: 800;
-	color: #B1663C
+	font-weight: 500;
+	color: white;
 }
-
+h2,h3,h4{
+	font-family: 'Playfair Display', serif;
+}
+button,
+p,li{
+	font-family: Geist;
+}
 h1 > span {
-	font-family: 'Work Sans';
-	font-size:10px;
-	letter-spacing: 0.1em;
+	font-size:6rem;
+	font-weight:200 ;
 }
 a{
 	text-decoration: none;
 	color: inherit;
 }
-h2{
-	font-family: 'Syne';
-	font-weight: 700;
-	font-size: 30px;
-	color: #1D6154
-}
-nav ul {
+header nav {
+	position: absolute;
+	top: 50px;
+	left: 0;
 	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	width: 100%;
+	gap: 35%;
+}
+header nav ul{
+	display:flex;
+	flex-direction: row;
 	align-items: center;
+	gap:10px ;
 	list-style-type: none;
-
 }
-nav li {
+header nav li {
 	padding: 0 10px;
-	font-size: 1.2em;
+	font-size: 1.5em;
+	color: white;
+	border-bottom: 1px solid transparent;
+	padding-bottom: 20px;
 }
-
-li:hover {
-	color: #B1663C;
+header nav li:hover {
+	opacity: 0.8;
+	border-bottom: 1px solid white !important;
 }
-#introduction {
-	display: flex;
-	align-items: center;
-	margin: 100px 0px 130px 0px;
-}
-#introduction figure {
-	flex: 1
-}
-#introduction img {
-	display: block;
-	margin: auto;
-	width: 80%;
-}
-
-#introduction article {
-	flex: 1
-}
-#introduction h2 {
-	margin-bottom: 1em;
-}
-/* zone de modification */
-.titre-projet{
+header img{
 	position: relative;
-	text-align: center;
+	width: 100%;
 }
+.titre-header{
+	position: absolute;
+	top: 40%;
+	left: 18%;
+	text-align:center ;
+}
+.titre-header p{
+	text-align: left;
+	font-size: 1.5rem;
+	color: white;
+}
+#logo-nav-header{
+	width: 200px;
+}
+
+/* introduction */
+.introduction {
+	background-color: #fce4da;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	color: #3a5151;
+	padding: 60px 60px 80px 60px;
+}
+.introduction h2,h3{
+	font-size: 30px;
+}
+.introduction h4{
+	font-size: 30px;
+}
+.introduction p{
+	font-size: 16px;
+}
+.introduction article{
+	margin-bottom: 80px;
+}
+.presentation-une{
+	display: flex;
+	gap: 80px;
+}
+.presentation-une-image{
+	width: 400px;
+	height: 400px;
+}
+.presentation-une-image img{
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 200px 200px 8px 8px;
+	box-shadow: 10px 8px 14px rgba(0, 0, 0, 0.2);
+}
+.presentation-une-texte{
+	width: 500px;
+	height: 400px;
+}
+.presentation-une-texte h3 {
+	position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+	margin-top:0px;
+	margin-bottom:50px ;
+}
+.presentation-une-texte h3::before,
+.presentation-une-texte h3::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    border-bottom: 1px solid #3a5151;
+    width: calc(50% - 75px);
+}
+.presentation-une-texte h3::before {
+    left: 50px;
+}
+.presentation-une-texte h3::after {
+    right: 50px;
+}
+.presentation-une-texte h3 .icon img{
+    position: absolute;
+	top: 30px;
+	left: 45.5%;
+}
+.presentation-une-texte p{
+	line-height:28px;
+}
+.presentation-une-texte button{
+	border: 2px solid #3a5151;
+	background-color: transparent;
+	border-radius: 4px;
+	padding: 5px 15px;
+	font-size: 16px;
+	margin-top: 20px;
+}
+.presentation-une-texte button:hover{
+	background-color: #3a5151;
+	color: white;
+	cursor: pointer;
+}
+
+/* zone titre article-boutique */
+.article-boutique h2{
+	position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+	margin-top:50px;
+	margin-bottom:50px ;
+	font-size: 42px;
+	color: #3a5151;
+}
+.article-boutique h2 .icon img{
+	position: absolute;
+	top: 50px;
+	left: 48.5%;
+}
+.article-boutique h2::before,
+.article-boutique h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    border-bottom: 1px solid #3a5151;
+    width: 11%;
+}
+.article-boutique h2::before {
+    left: 52%;
+}
+.article-boutique h2::after {
+    right: 52%;
+}
+.article-boutique{
+	width: 80%;
+	margin: auto;
+}
+/* zone articles boutique */
+#portfolio{
+	display:flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	font-family: Geist;
+	font-size: 16px;
+	color: black;
+}
+.gallery figure {
+	border: 1px solid white;
+	padding: 10px;
+	border-radius: 12px;
+	text-align: start;
+	width: 350px;
+}
+.gallery figure h3{
+	margin: 10px auto;
+  	color: #3a5151;
+}
+.gallery figure:hover {
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.5);
+}
+.gallery img {
+	width: 100%;
+	height: 380px;
+	object-fit: cover;
+	border-radius: 8px;
+	transition: transform 0.5s ease;
+}
+.gallery img:hover {
+	transform: scale(1.06);
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.5);
+	cursor: pointer;
+}
+.btn-acheter {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #3a5151;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Geist;
+  font-size: 16px;
+  border: 2px solid white;
+}
+.btn-acheter:hover{
+	color: #3a5151;
+	background-color: white;
+	border: 2px solid #3a5151;
+}
+
+/* zone de modification */
 .div-modification {
 	color: black;
 	font-size: 14px;
@@ -138,7 +293,6 @@ li:hover {
 	gap: 10px;
 	border: none;
 	background-color: inherit;
-	font-family: Work Sans;
 }
 .div-modification:hover {
 	opacity: 0.5;
@@ -162,7 +316,6 @@ li:hover {
 }
 .modal h2{
 	margin-top: 40px;
-	font-family: Work Sans;
 	font-weight: 400;
 	font-size: 26px;
 	line-height: 100%;
@@ -211,14 +364,6 @@ li:hover {
 }
 #introduction p {
 	margin-bottom: 0.5em;
-}
-#portfolio h2 {
-	text-align: center;
-	margin-bottom: 1em;
-}
-#portfolio {
-	
-	padding: 10px;
 }
 
 /* zone filtres */
@@ -288,10 +433,8 @@ li:hover {
 #user-open{
 	cursor: pointer;
 	border: none;
-	background-color: white;
-	font-family: Work Sans;
 	font-weight: 400;
-	font-size: 16px;
+	font-size: 1.5em;
 
 }
 
@@ -361,7 +504,6 @@ li:hover {
 	border: 1px solid #E8F1F6;
 	border-radius: 50px;
 	padding: 10px 20px;
-	font-family: Work Sans;
 	font-weight: 500;
 	font-size: 14px;
 	margin-bottom: 0.25em;
@@ -414,7 +556,6 @@ li:hover {
 }
 .btn-connexion,
 .btn-contact{
-	font-family: 'Syne';
 	font-weight: 700;
 	color: white;
 	background-color: #1D6154;
@@ -427,7 +568,6 @@ li:hover {
 }
 .btn-valider-ajout,
 .btn-ajout{
-	font-family: 'Syne';
 	font-weight: 700;
 	color: white;
 	background-color: #1D6154;
@@ -502,11 +642,6 @@ margin: auto;
 	border: none;
 	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 }
-footer nav ul {
-	display: flex;
-	justify-content: flex-end;
-	margin: 2em
-}
 
 /* media queries */
 @media (max-width: 768px) {
@@ -525,10 +660,6 @@ footer nav ul {
 		left: inherit;
 		justify-content: center;
 		align-items: center;
-	}
-	.titre-projet{
-		display: flex;
-		flex-direction: column;
 	}
 	#portfolio {
 		display: grid;
@@ -554,3 +685,5 @@ footer nav ul {
 		grid-template-columns: 1fr;
 	}
  }
+
+

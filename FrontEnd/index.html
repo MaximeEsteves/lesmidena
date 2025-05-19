@@ -2,16 +2,17 @@
 <html lang="fr">
 <head>
 	<meta charset="UTF-8">
-	<title>Sophie Bluel - Architecte d'intérieur</title>
+	<title>Mignonneries de Nathalie - Accessoires mode artisanale</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="stylesheet" href="">
-	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" >
+	<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap" rel="stylesheet">	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
-	<script src="script.js" defer></script>
+	<script type="module" src="script.js" defer></script>
 </head>
 <body>
 	<div class="modal-content">
@@ -25,32 +26,52 @@
 			
 		</div>
 	</div>
-<header>
-	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
+	<header>
+		<img src="./assets/images/image-accueil.webp" alt="image accueil les mignonneries de nathalie">
+		<div class="titre-header">
+				<h1>Les mignonneries de <br> <span>Nathalie</span> </h1>
+				<p>Les petites choses du quotidien <br> cousues main pour petits et grands</p> 
+			</div>
 	<nav>
-		<ul>
-			<li><a href="#portfolio">projets</a></li>
-			<li><a href="#contact">contact</a></li>
-			<li><button id="user-open">login</button></li>
+		<img id="logo-nav-header" src="./assets/images/logo-nav.webp" alt="logo les mignonneries de nathalie">
+		<ul class="btn-nav">
+			<li><a href="#">Accueil</a></li>
+			<li><a href="#creation">Créations</a></li>
+			<li><a href="#blog">Blog</a></li>
+			<li><a href="#contact">Contact</a></li>
+			<li id="user-open"><a href="login.html">Login</a></li>
 			<li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
 		</ul>
 	</nav>
 </header>
 <main>
 	<div id="base-content">
-	<section id="introduction">
-		<figure>
-			<img src="./assets/images/sophie-bluel.png" alt="">
-		</figure>
+	<section class="introduction">
 		<article>
-			<h2>Designer d'espace</h2>
-			<p>Je raconte votre histoire, je valorise vos idées. Je vous accompagne de la conception à la livraison finale du chantier.</p>
-			<p>Chaque projet sera étudié en commun, de façon à mettre en valeur les volumes, les matières et les couleurs dans le respect de l’esprit des lieux et le choix adapté des matériaux. Le suivi du chantier sera assuré dans le souci du détail, le respect du planning et du budget.</p>
-			<p>En cas de besoin, une équipe pluridisciplinaire peut-être constituée : architecte DPLG, décorateur(trice)</p>
+			<h2>Bienvenue chez Les mignonneries de Nathalie</h2>
+			<p>Découvrez une sélection unique d'accessoires faits main qui apporteront une note de douceur et d'originalité à votre quotidien.</p>
+			<p>Parcourez ma boutique en ligne ou rendez-vous directement en magasin, à la jardinerie Couleurs Jardin à Mazamet (81). </p>
 		</article>
+		<div class="presentation-une">
+			<div class="presentation-une-image">
+				<img src="./assets/images/sac-presentation.jpg" alt="">
+			</div>
+			<div class="presentation-une-texte">
+				<h3>Les mignonnerie du moment
+					<span class="icon"><img src="./assets/images/etoile-icon.png" alt="étoile"></span>
+				</h3>
+				<h4>Le Sac Cabas <span>29.99€</span></h4>
+				<p>Le Sac Cabas rayé d’assez grande capacité. Confectionné avec un tissu épais en coton marinière résistant pour l'extérieur et du lin pour l'intérieur.
+					<br><br>
+				Ajoutez une touche de mignonnerie à votre garde-robe dès maintenant !</p>
+				<button><a href="#">Découvrir</a></button>
+			</div>
+		</div>
 	</section>
-	<section>
-		<h2 class="titre-projet">Mes Projets</h2>
+	<section class="article-boutique">
+		<h2>Les mignonneries
+			<span class="icon"><img src="./assets/images/etoile-icon.png" alt="étoile"></span>
+		</h2>
 		<div class="zone-btn"></div>
 		<div id="portfolio"></div>
 	</section>
