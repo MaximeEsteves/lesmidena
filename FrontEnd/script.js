@@ -13,13 +13,13 @@
 //          return error
 //  	}
 //  }
- projets();
+ projets(stockArticles);
  filtres();
 //  modal();
 
 
 /* fonction d'affichage des filtres */
-async function filtres() {
+function filtres() {
     if (window.localStorage.getItem("token")) {
         return;
     }
@@ -32,12 +32,12 @@ async function filtres() {
     zoneBtn.classList.add("zone-btn");
 
     // Récupération des projets
-    const worksData = await fetchData("http://localhost:5678/api/works");
+    const worksData = stockArticles;
 
     // Création d'un Set pour stocker les catégories uniques
     const categoriesSet = new Set();
     worksData.forEach(article => {
-        categoriesSet.add(article.category.name);
+        categoriesSet.add(article.categorie);
     });
 
     // Bouton "Tous"
@@ -51,7 +51,7 @@ async function filtres() {
 
         const portfolio = document.getElementById("portfolio");
         portfolio.innerHTML = "";
-        projets(worksData);
+        projets(stockArticles);
 
         btnTous.classList.add("click-btn");
     });
@@ -68,7 +68,7 @@ async function filtres() {
 
             const portfolio = document.getElementById("portfolio");
             portfolio.innerHTML = "";
-            const filtered = worksData.filter(article => article.category.name === category);
+            const filtered = worksData.filter(article => article.categorie === category);
             projets(filtered);
 
             btn.classList.add("click-btn");
@@ -78,62 +78,65 @@ async function filtres() {
     titre.appendChild(zoneBtn);
 }
 // /* fonction d'affichage des projets */
-async function projets() {
-    const portfolio = document.getElementById("portfolio");
-    portfolio.classList.add("gallery");
-    if (localStorage.getItem("token")) {
-        const h2 = document.querySelector(".titre-projet")
-        const divModification = document.createElement("button");
-        const pModification = document.createElement("span");
-        const iModification = document.createElement("i");
+function projets(stockArticles) {
+  const portfolio = document.getElementById("portfolio");
+  portfolio.classList.add("gallery");
+  portfolio.innerHTML = ""; // On vide le conteneur
 
-        h2.style.marginBottom = "80px";
-        pModification.innerHTML = "Modifier";
-        iModification.classList.add("fa-solid", "fa-pen-to-square");
-        divModification.classList.add("div-modification");
+  // Création de l'observer pour le lazy loading des images
+  const imgObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        // On charge l'image réelle
+        img.src = img.dataset.src;
+        observer.unobserve(img);
+      }
+    });
+  }, { threshold: 0.1 });
 
-        divModification.appendChild(iModification);
-        divModification.appendChild(pModification);
-        h2.appendChild(divModification);
-    }
- try {
-     // 👇 On parcourt chaque catégorie
-        stockArticles.forEach(article => {
-            const produit = article.produits[0];
-                const figure = document.createElement("figure");
+  // Parcours de tous les produits de stockArticles
+  stockArticles.forEach(article => {
+    article.produits.forEach(produit => {
+      const figure = document.createElement("figure");
 
-                const img = document.createElement("img");
-                img.src = produit.image;
-                img.alt = `image de ${produit.nom}`;
+      const img = document.createElement("img");
+      // Stocker l'URL réelle dans data-src
+      img.dataset.src = Array.isArray(produit.image) ? produit.image[0] : produit.image;
+      // Laisser src vide ou pointer vers une image placeholder
+      img.src = "";
+      img.alt = `image de ${produit.nom}`;
 
-                const description = document.createElement("p");
-                description.textContent = `${produit.description}`;
+      const figcaption = document.createElement("h3");
+      figcaption.textContent = produit.nom;
 
-                const prix = document.createElement("p");
-                prix.textContent = `${produit.prix}€`;
+      const description = document.createElement("p");
+      description.classList.add("description-carte");
+      description.textContent = produit.description;
 
-                const figcaption = document.createElement("h3");
-                figcaption.textContent = produit.nom;
+      const prix = document.createElement("p");
+      prix.textContent = `${produit.prix}€`;
 
-                const bouton = document.createElement("button");
-                bouton.textContent = "Acheter";
-                bouton.classList.add("btn-acheter");
+      const bouton = document.createElement("button");
+      bouton.textContent = "Acheter";
+      bouton.classList.add("btn-acheter");
 
-                figure.appendChild(img);
-                figure.appendChild(figcaption);
-                figure.appendChild(description);
-                figure.appendChild(prix);
-                figure.appendChild(bouton);
+      figure.appendChild(img);
+      figure.appendChild(figcaption);
+      figure.appendChild(description);
+      figure.appendChild(prix);
+      figure.appendChild(bouton);
+      portfolio.appendChild(figure);
 
-                portfolio.appendChild(figure);
-                img.addEventListener("click", () => {
-                window.location.href = `produit.html?ref=${produit.reference}`;
-                });
+      // Observer l'image pour charger celle-ci quand elle sera visible
+      imgObserver.observe(img);
 
-        });
-} catch (error) {
-
-}
+      // Redirection vers la fiche produit au clic sur l'image
+      img.addEventListener("click", () => {
+        window.location.href = `produit.html?ref=${produit.reference}`;
+      });
+    });
+  });
 }
 
 //* fonction contenu de la modale Galarie Photo */

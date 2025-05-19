@@ -479,26 +479,3 @@ header > img {
     margin: 80px auto;
 }
 
-/* footer */
-footer{
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #3a5151;
-    color: white;
-    padding: 20px 0px;
-}
-.div-footer ul{
-    padding: 0;
-}
-.div-footer h3{
-    margin: 5px auto;
-}
-.lien-footer li{
-    margin: 10px auto;
-}
-.lien-footer-reseaux {
-    display: flex;
-    justify-content: space-around;
-    font-size:24px;
-}
