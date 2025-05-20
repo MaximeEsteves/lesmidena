@@ -1,25 +1,27 @@
-// backend/controllers/authController.js
+const Utilisateur = require("../models/Utilisateur");
+const bcrypt      = require("bcrypt");
+const jwt         = require("jsonwebtoken");
 
-const jwt = require("jsonwebtoken");
-
-// Simule une base de données temporaire pour les tests
-const users = [];
-
-exports.register = (req, res) => {
-  const { email, password } = req.body;
-  const userExists = users.find(user => user.email === email);
-  if (userExists) return res.status(400).json({ message: "Utilisateur déjà inscrit" });
-
-  const user = { email, password }; // À remplacer par du hash + DB en prod
-  users.push(user);
-  res.status(201).json({ message: "Utilisateur créé avec succès" });
+exports.register = async (req, res) => {
+  const { email, motDePasse } = req.body;
+  if (await Utilisateur.findOne({ email })) {
+    return res.status(400).json({ message: "Email déjà utilisé" });
+  }
+  const hash = await bcrypt.hash(motDePasse, 10);
+  const user = await new Utilisateur({ email, motDePasse: hash }).save();
+  res.status(201).json({ message: "Utilisateur créé", id: user._id });
 };
 
-exports.login = (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find(user => user.email === email && user.password === password);
-  if (!user) return res.status(401).json({ message: "Email ou mot de passe invalide" });
-
-  const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+exports.login = async (req, res) => {
+  const { email, motDePasse } = req.body;
+  const user = await Utilisateur.findOne({ email });
+  if (!user || !(await bcrypt.compare(motDePasse, user.motDePasse))) {
+    return res.status(401).json({ message: "Email ou mot de passe invalide" });
+  }
+  const token = jwt.sign(
+    { id: user._id, isAdmin: user.isAdmin },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
   res.json({ token });
 };

@@ -62,8 +62,31 @@ a{
 	text-decoration: none;
 	color: inherit;
 }
+
+/* ====== Styles au scroll > 50px ====== */
+header.scrolled nav {
+  background-color: #3a5151;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 1000;
+  top: 0;
+  padding: 10px 0; 
+  transition: all 0.5s ease;
+  gap: 10%;
+}
+header.scrolled nav a#logo-nav-header{
+  transition: width 0.3s ease;
+}
+header.scrolled nav ul li {
+  border-bottom: 1px solid transparent;
+  transition: all 0.5s ease;
+}
+header.scrolled nav ul li:hover {
+  border-bottom-color: black;
+  opacity: 0.8;
+}
 header nav {
-	position: absolute;
+	position: fixed;
 	top: 50px;
 	left: 0;
 	display: flex;
@@ -71,6 +94,7 @@ header nav {
 	justify-content: space-around;
 	width: 100%;
 	gap: 35%;
+	transition: all 0.3s ease;
 }
 header nav ul{
 	display:flex;

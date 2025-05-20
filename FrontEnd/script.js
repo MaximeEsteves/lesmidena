@@ -17,6 +17,18 @@
  filtres();
 //  modal();
 
+  // On attend que le DOM soit chargé
+  document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('header');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  });
 
 /* fonction d'affichage des filtres */
 function filtres() {
@@ -96,8 +108,7 @@ function projets(stockArticles) {
   }, { threshold: 0.1 });
 
   // Parcours de tous les produits de stockArticles
-  stockArticles.forEach(article => {
-    article.produits.forEach(produit => {
+  stockArticles.forEach(produit => {
       const figure = document.createElement("figure");
 
       const img = document.createElement("img");
@@ -135,7 +146,6 @@ function projets(stockArticles) {
       img.addEventListener("click", () => {
         window.location.href = `produit.html?ref=${produit.reference}`;
       });
-    });
   });
 }
 
