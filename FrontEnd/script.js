@@ -1,578 +1,761 @@
- import stockArticles from './stock-article.js';
-//  const focusableSelector = 'a, textarea, button, i[tabindex], input, select';
-//  let focusables = [];
-//  let previousActiveElement = null;
-//  const fetchData = async (url, options = {}) => {
-//      try {
-//          const res = await fetch(url, options);
-//  		if (res.ok) {
-//  			const data = await res.json()
-//  			return data
-//  		}
-//  	} catch (error) {
-//          return error
-//  	}
-//  }
- projets(stockArticles);
- filtres();
-//  modal();
+//  import stockArticles from './stock-article.js';
+  const focusableSelector = 'a, textarea, button, i[tabindex], input, select';
+  let focusables = [];
+  let previousActiveElement = null;
+// Fonction utilitaire fetchData
+async function fetchData(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (res.ok) {
+      return await res.json();
+    } else {
+      throw new Error(`Erreur HTTP: ${res.status}`);
+    }
+  } catch (error) {
+    console.error("fetchData error:", error);
+    throw error;
+  }
+}
+ document.addEventListener('DOMContentLoaded', () => {
+    document
+      .getElementById('file-upload-couverture')
+      .addEventListener('change', previewFileCouverture);
 
-  // On attend que le DOM soit chargé
-  document.addEventListener('DOMContentLoaded', function() {
+    // document
+    //   .getElementById('file-upload-images')
+    //   .addEventListener('change', previewFilesProduit);
+  });
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const productsData = await fetchData("http://localhost:3000/api/produits");
+
+    // Appeler projets() et filtres() avec les données récupérées
+    projets(productsData);
+    filtres(productsData);
+
     const header = document.querySelector('header');
-
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
+      header.classList.toggle('scrolled', window.scrollY > 50);
     });
+  } catch (error) {
+    console.error("Erreur lors du chargement des produits :", error);
+  }
+});
+
+// Fonction d'affichage des filtres (adaptée pour recevoir les données)
+ function filtres(worksData) {
+
+  const titre = document.querySelector(".titre-projet");
+  let zoneBtn = document.querySelector(".zone-btn");
+  if (zoneBtn) zoneBtn.remove();
+
+  zoneBtn = document.createElement("div");
+  zoneBtn.classList.add("zone-btn");
+
+  // Récupérer les catégories uniques
+  const categoriesSet = new Set();
+  worksData.forEach(article => {
+    categoriesSet.add(article.categorie);
   });
 
-/* fonction d'affichage des filtres */
-function filtres() {
-    if (window.localStorage.getItem("token")) {
-        return;
-    }
-    const titre = document.querySelector(".titre-projet");
-    let zoneBtn = document.querySelector(".zone-btn");
-    if (zoneBtn) {
-        zoneBtn.remove(); // Pour éviter les doublons si filtres() est rappelée
-    }
-    zoneBtn = document.createElement("div");
-    zoneBtn.classList.add("zone-btn");
+  // Bouton "Tous"
+  const btnTous = document.createElement("button");
+  btnTous.innerText = "Tous";
+  btnTous.classList.add("btn-categorie", "click-btn");
+  btnTous.addEventListener("click", function () {
+    const allBtns = document.querySelectorAll(".btn-categorie");
+    allBtns.forEach(b => b.classList.remove("click-btn"));
 
-    // Récupération des projets
-    const worksData = stockArticles;
+    document.getElementById("portfolio").innerHTML = "";
+    projets(worksData);
 
-    // Création d'un Set pour stocker les catégories uniques
-    const categoriesSet = new Set();
-    worksData.forEach(article => {
-        categoriesSet.add(article.categorie);
-    });
-
-    // Bouton "Tous"
-    const btnTous = document.createElement("button");
-    btnTous.innerText = "Tous";
-    btnTous.classList.add("btn-categorie");
     btnTous.classList.add("click-btn");
-    btnTous.addEventListener("click", function () {
-        const allBtns = document.querySelectorAll(".btn-categorie");
-            allBtns.forEach(b => b.classList.remove("click-btn"));
+  });
+  zoneBtn.appendChild(btnTous);
 
-        const portfolio = document.getElementById("portfolio");
-        portfolio.innerHTML = "";
-        projets(stockArticles);
+  // Création dynamique des boutons de filtre
+  categoriesSet.forEach(category => {
+    const btn = document.createElement("button");
+    btn.innerText = category;
+    btn.classList.add("btn-categorie");
+    btn.addEventListener("click", function () {
+      const allBtns = document.querySelectorAll(".btn-categorie");
+      allBtns.forEach(b => b.classList.remove("click-btn"));
 
-        btnTous.classList.add("click-btn");
+      document.getElementById("portfolio").innerHTML = "";
+      const filtered = worksData.filter(article => article.categorie === category);
+      projets(filtered);
+
+      btn.classList.add("click-btn");
     });
-    zoneBtn.appendChild(btnTous);
+    zoneBtn.appendChild(btn);
+  });
 
-    // Création dynamique des boutons de filtre
-    categoriesSet.forEach(category => {
-        const btn = document.createElement("button");
-        btn.innerText = category;
-        btn.classList.add("btn-categorie");
-        btn.addEventListener("click", function () {
-            const allBtns = document.querySelectorAll(".btn-categorie");
-            allBtns.forEach(b => b.classList.remove("click-btn"));
-
-            const portfolio = document.getElementById("portfolio");
-            portfolio.innerHTML = "";
-            const filtered = worksData.filter(article => article.categorie === category);
-            projets(filtered);
-
-            btn.classList.add("click-btn");
-        });
-        zoneBtn.appendChild(btn);
-    });
-    titre.appendChild(zoneBtn);
+  titre.appendChild(zoneBtn);
 }
-// /* fonction d'affichage des projets */
-function projets(stockArticles) {
+
+// Fonction d'affichage des projets avec lazy loading
+ function projets(worksData) {
   const portfolio = document.getElementById("portfolio");
   portfolio.classList.add("gallery");
-  portfolio.innerHTML = ""; // On vide le conteneur
+   portfolio.innerHTML = ""; // Nettoyer le conteneur avant d'ajouter les projets
 
-  // Création de l'observer pour le lazy loading des images
+  // Si l'utilisateur est connecté, ajouter le bouton "Modifier" une seule fois
+  if (localStorage.getItem("token")) {
+    const h2 = document.querySelector(".titre-projet");
+    // Vérifie si le bouton modifier existe déjà
+    if (!h2.querySelector(".div-modification")) {
+      const divModification = document.createElement("button");
+      const pModification = document.createElement("span");
+      const iModification = document.createElement("i");
+      
+      pModification.innerHTML = "Modifier";
+      iModification.classList.add("fa-solid", "fa-pen-to-square");
+      divModification.classList.add("div-modification");
+      
+      divModification.appendChild(iModification);
+      divModification.appendChild(pModification);
+      h2.appendChild(divModification);
+    }
+  }
+
   const imgObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
-        // On charge l'image réelle
         img.src = img.dataset.src;
         observer.unobserve(img);
       }
     });
   }, { threshold: 0.1 });
 
-  // Parcours de tous les produits de stockArticles
-  stockArticles.forEach(produit => {
-      const figure = document.createElement("figure");
+  worksData.forEach(produit => {
+    const figure = document.createElement("figure");
+  figure.dataset.id = produit._id;
+    const img = document.createElement("img");
+const baseURL = "http://localhost:3000/";
+  worksData.forEach(produit => {
+    const raw = Array.isArray(produit.image) 
+      ? produit.image[0] 
+      : produit.image || "";
+    const clean = raw.replace(/\\/g, "/").trim();
 
-      const img = document.createElement("img");
-      // Stocker l'URL réelle dans data-src
-      img.dataset.src = Array.isArray(produit.image) ? produit.image[0] : produit.image;
-      // Laisser src vide ou pointer vers une image placeholder
-      img.src = "";
-      img.alt = `image de ${produit.nom}`;
+    let src;
+    if (/^https?:\/\//i.test(clean)) {
+      src = clean;
+    } else if (clean.startsWith("/")) {
+      src = baseURL + clean.slice(1);
+    } else {
+      src = baseURL + clean;
+    }
 
-      const figcaption = document.createElement("h3");
-      figcaption.textContent = produit.nom;
+    img.dataset.src = src;
+    img.alt = `image de ${produit.nom}`;
+});
+    const figcaption = document.createElement("h3");
+    figcaption.textContent = produit.nom;
 
-      const description = document.createElement("p");
-      description.classList.add("description-carte");
-      description.textContent = produit.description;
+    const description = document.createElement("p");
+    description.classList.add("description-carte");
+    description.textContent = produit.description;
 
-      const prix = document.createElement("p");
-      prix.textContent = `${produit.prix}€`;
+    const prix = document.createElement("p");
+    prix.textContent = `${produit.prix}€`;
 
-      const bouton = document.createElement("button");
-      bouton.textContent = "Acheter";
-      bouton.classList.add("btn-acheter");
+    const bouton = document.createElement("button");
+    bouton.textContent = "Acheter";
+    bouton.classList.add("btn-acheter");
 
-      figure.appendChild(img);
-      figure.appendChild(figcaption);
-      figure.appendChild(description);
-      figure.appendChild(prix);
-      figure.appendChild(bouton);
-      portfolio.appendChild(figure);
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    figure.appendChild(description);
+    figure.appendChild(prix);
+    figure.appendChild(bouton);
+    portfolio.appendChild(figure);
 
-      // Observer l'image pour charger celle-ci quand elle sera visible
-      imgObserver.observe(img);
+  // Boutons pour utilisateur connecté
+  if (localStorage.getItem("token")) {
+    // Bouton supprimer déjà présent...
+    const btnSupprimer = document.createElement("button");
+    btnSupprimer.classList.add("icone-supprimer");
+    const iconSupprimer = document.createElement("i");
+    iconSupprimer.classList.add("fa-solid", "fa-trash-can");
+    btnSupprimer.appendChild(iconSupprimer);
+    btnSupprimer.addEventListener("click", () => {
+      deletePhoto(figure);
+    });
+    figure.appendChild(btnSupprimer);
+    
+    // Bouton modifier : ouvre la modale de modification
+    const btnModifier = document.createElement("button");
+    btnModifier.classList.add("icone-modifier");
+    const iconModifier = document.createElement("i");
+    iconModifier.classList.add("fa-solid", "fa-pen-to-square");
+    btnModifier.appendChild(iconModifier);
+    btnModifier.addEventListener("click", () => {
+      openModificationModal(produit);
+    });
+    figure.appendChild(btnModifier);
+  }
 
-      // Redirection vers la fiche produit au clic sur l'image
-      img.addEventListener("click", () => {
-        window.location.href = `produit.html?ref=${produit.reference}`;
-      });
+    portfolio.appendChild(figure);
+    imgObserver.observe(img);
+
+    imgObserver.observe(img);
+
+    img.addEventListener("click", () => {
+      window.location.href = `produit.html?ref=${produit.reference}`;
+    });
   });
 }
+  const editors = {
+      descriptionComplete: new Quill('#editor-descriptionComplete', { theme: 'snow' })
+    };
+function openModificationModal(produit) {
+  const modal        = document.querySelector(".modal");
+  const modalContent = document.querySelector(".modal-content");
+  const titreModal   = modal.querySelector(".titre-modal");
+  const form         = modal.querySelector("#product-form");
+  const baseURL      = "http://localhost:3000/";
+
+  // ─── 0) Normalisation des chemins : on retire tout préfixe http(s)://domaine/
+  if (produit.imageCouverture) {
+    produit.imageCouverture = produit.imageCouverture
+      .replace(/^https?:\/\/[^/]+\//, "");
+  }
+  if (Array.isArray(produit.image)) {
+    produit.image = produit.image.map(img =>
+      img.replace(/^https?:\/\/[^/]+\//, "")
+    );
+  }
+
+  // ─── 1) Afficher la modale
+  titreModal.textContent      = "Modifier le produit";
+  modal.style.display         = "flex";
+  modalContent.style.display  = "flex";
+
+  // ─── 2) Préremplissage des champs texte
+  form.elements["categorie"].value        = produit.categorie;
+  form.elements["nom"].value              = produit.nom;
+  form.elements["titreDescription"].value = produit.titreDescription;
+  form.elements["description"].value      = produit.description;
+  form.elements["materiaux"].value        = produit.materiaux;
+  form.elements["prix"].value             = produit.prix;
+  form.elements["reference"].value        = produit.reference;
+  form.elements["stock"].value            = produit.stock;
+
+  // Préremplir Quill
+  editors.descriptionComplete.clipboard.dangerouslyPasteHTML(
+    produit.descriptionComplete
+  );
+
+  // ─── 3) Image de couverture
+  const couverturePreview = document.getElementById("preview-couverture");
+  if (produit.imageCouverture) {
+    const urlCover = baseURL + produit.imageCouverture;
+    couverturePreview.src     = urlCover;
+    couverturePreview.alt     = "Image de couverture";
+    couverturePreview.style.display = "block";
+  } else {
+    couverturePreview.style.display = "none";
+  }
+
+  // ─── 4) Images multiples existantes
+  const gallery = document.getElementById("preview-multi-images");
+  gallery.innerHTML = "";
+  const imagesASupprimer = [];
+
+  produit.image.forEach((relPath, idx) => {
+    const figure = document.createElement("figure");
+    figure.classList.add("image-wrapper");
+
+    const img = document.createElement("img");
+    img.src = baseURL + relPath;
+    img.alt = `Image ${idx + 1}`;
+    img.classList.add("image-preview");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.classList.add("icone-supprimer-modal");
+    btn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+    btn.addEventListener("click", e => {
+      const fig = e.currentTarget.closest("figure");
+      imagesASupprimer.push(relPath);
+      fig.remove();
+    });
+
+    figure.append(btn, img);
+    gallery.appendChild(figure);
+  });
+
+  // ─── 5) Preview des nouvelles images
+  const inputMulti = document.getElementById("file-upload-images");
+  inputMulti.value = "";
+  inputMulti.onchange = () => {
+    Array.from(inputMulti.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const figure = document.createElement("figure");
+        figure.classList.add("image-wrapper");
+
+        const img = document.createElement("img");
+        img.src = reader.result;
+        img.alt = file.name;
+        img.classList.add("image-preview");
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.classList.add("icone-supprimer-modal");
+        btn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+         btn.addEventListener("click", e => {
+      const fig = e.currentTarget.closest("figure");
+      imagesASupprimer.push(relPath);
+      fig.remove();
+    });
+
+        figure.append(btn, img);
+        gallery.appendChild(figure);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // ─── 6) Soumission du formulaire
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const token = window.localStorage.getItem("token");
+
+    // a) Mettre le HTML de Quill dans le hidden input
+    document.getElementById("input-descriptionComplete").value =
+      editors.descriptionComplete.root.innerHTML;
+
+    // b) Construire FormData
+    const formData = new FormData(form);
+    imagesASupprimer.forEach(path => {
+      formData.append("imagesASupprimer", path);
+    });
+
+    // c) Envoyer
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/produits/${produit._id}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        }
+      );
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Erreur:", res.status, text);
+        return;
+      }
+      closeModal();
+      const data = await fetchData("http://localhost:3000/api/produits");
+      projets(data);
+    } catch (err) {
+      console.error("Erreur fetch:", err);
+    }
+  };
+}
+
+
+// Preview image de couverture
+function previewFileCouverture() {
+  const input = document.getElementById("file-upload-couverture");
+  const file = input.files[0];
+  const preview = document.getElementById("preview-couverture");
+  const error = input.closest(".custom-file-upload").querySelector(".text-error-add-photo");
+
+  if (!file) return;
+
+  if (file.size > 4 * 1024 * 1024) {
+    error.textContent = "Le fichier dépasse 4 Mo.";
+    error.style.color = "red";
+    return;
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    error.textContent = "Seuls JPG, WEBP et PNG sont autorisés.";
+    error.style.color = "red";
+    return;
+  }
+
+  error.textContent = "";
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+}
+
+
+// Preview images produit multiples
+// function previewFilesProduit() {
+//   const input = document.getElementById("file-upload-images");
+//   const files = input.files;
+//   const gallery = document.getElementById("preview-multi-images");
+//   const error = input.closest(".custom-file-upload").querySelector(".text-error-add-photo");
+
+//   if (!files.length) return;
+
+//   [...files].forEach(file => {
+//     if (file.size > 4 * 1024 * 1024) {
+//       error.textContent = "Un fichier dépasse 4 Mo.";
+//       error.style.color = "red";
+//       return;
+//     }
+
+//     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+//     if (!allowedTypes.includes(file.type)) {
+//       error.textContent = "Seuls JPG, WEBP et PNG sont autorisés.";
+//       error.style.color = "red";
+//       return;
+//     }
+
+//     const reader = new FileReader();
+//     reader.onload = () => {
+//       const figure = document.createElement("figure");
+//       figure.classList.add("image-wrapper");
+
+//       const img = document.createElement("img");
+//       img.src = reader.result;
+//       img.classList.add("image-preview");
+//       img.alt = "Nouvelle image";
+
+//       const btnSupprimer = document.createElement("button");
+//       btnSupprimer.classList.add("icone-supprimer");
+//       btnSupprimer.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+//       btnSupprimer.style.cssText = "width: 25px; height: 25px; font-size: 15px; opacity: 1";
+//       btnSupprimer.onclick = () => figure.remove();
+
+//       figure.appendChild(btnSupprimer);
+//       figure.appendChild(img);
+//       gallery.appendChild(figure);
+//     };
+//     reader.readAsDataURL(file);
+//   });
+// input.value = "";
+// }
+
 
 //* fonction contenu de la modale Galarie Photo */
-// async function modal(){
-//     const gallery = document.querySelector(".ajout-galerie");
-//     const worksData = await fetchData("http://localhost:3000/api/articles");
-
-//     worksData.forEach(article => {
-//         const figure = document.createElement("figure");
-//         figure.dataset.id = article.id;
-
-//         const img = document.createElement("img");
-//         img.src = article.imageUrl;
-//         img.alt = `image de ${article.title}`;
-//         figure.appendChild(img);
-
-//         const btnSupprimer = document.createElement("button");
-//         btnSupprimer.classList.add("icone-supprimer");
-
-//         const icon = document.createElement("i");
-//         icon.classList.add("fa-solid", "fa-trash-can");
-
-//         btnSupprimer.appendChild(icon);
-//         figure.appendChild(btnSupprimer);
-
-//         gallery.appendChild(figure);
-//     });
-    
-//     // Mise à jour de la liste des éléments focusables dans la modale
-//     const modal = document.querySelector(".modal");
-//     focusables = Array.from(modal.querySelectorAll(focusableSelector));
-    
-// }
+//  async function modal(){
+//      const gallery = document.querySelector(".ajout-galerie");
+//      const worksData = await fetchData("http://localhost:3000/api/produits");
+//      worksData.forEach(article => {
+//          const figure = document.createElement("figure");
+//          figure.dataset.id = article.id;
+//          const img = document.createElement("img");
+//          img.src = article.imageUrl;
+//          img.alt = `image de ${article.title}`;
+//          figure.appendChild(img);
+//          const btnSupprimer = document.createElement("button");
+//          btnSupprimer.classList.add("icone-supprimer");
+//          const icon = document.createElement("i");
+//          icon.classList.add("fa-solid", "fa-trash-can");
+//          btnSupprimer.appendChild(icon);
+//          figure.appendChild(btnSupprimer);
+//          gallery.appendChild(figure);
+//      });
+  
+//      // Mise à jour de la liste des éléments focusables dans la modale
+//      const modal = document.querySelector(".modal");
+//      focusables = Array.from(modal.querySelectorAll(focusableSelector));
+  
+//  }
 
 // /* fonction affichage de la modale d'ajout de photo */
-// async function modalAjoutPhoto() {
-//     const textTitreModal = document.querySelector(".modal h2");
-//     const textBtn = document.querySelector(".btnp");
-//     const gallery = document.querySelector(".ajout-galerie");
-
-//     // Nettoyage et configuration
-//     gallery.innerHTML = "";
-//     textTitreModal.innerHTML = "Ajout photo";
-//     textBtn.style.display = "none";
-//     gallery.classList.add("ajout-projet");
-
-//     // Bouton retour
-//     const btnRetour = document.createElement("i");
-//     btnRetour.classList.add("fa-solid", "fa-arrow-left", "btn-retour-modal");
-//     btnRetour.setAttribute("role", "button");
-//     btnRetour.setAttribute("aria-label", "Retour");
-//     btnRetour.setAttribute("tabindex", "0");
-//     gallery.appendChild(btnRetour);
-
-//     // Formulaire
-//     const form = document.createElement("form");
-//     form.setAttribute("id", "form-ajout-photo");
-//     form.setAttribute("enctype", "multipart/form-data");
-
-//     // Conteneur du formulaire
-//     const divForm = document.createElement("div");
-//     divForm.classList.add("formulaire-photo");
-
-//     // Label custom file upload
-//     const labelFile = document.createElement("label");
-//     labelFile.classList.add("custom-file-upload");
-
-//     // Image preview
-//     const imgPreview = document.createElement("img");
-//     imgPreview.id = "preview";
-//     imgPreview.style.display = "none";
-//     imgPreview.alt = "aperçu";
-//     labelFile.appendChild(imgPreview);
-
-//     // Icône image
-//     const icone = document.createElement("i");
-//     icone.classList.add("fa-solid", "fa-image", "picture-file");
-//     labelFile.appendChild(icone);
-
-//     // Texte bouton
-//     const spanBtnText = document.createElement("span");
-//     spanBtnText.classList.add("btn-text");
-//     spanBtnText.textContent = "+ Ajouter une photo";
-//     labelFile.appendChild(spanBtnText);
-
-//     // Infos fichier
-//     const spanFileInfo = document.createElement("span");
-//     spanFileInfo.classList.add("file-info");
-//     spanFileInfo.textContent = "jpg, png : 4 Mo max";
-//     labelFile.appendChild(spanFileInfo);
-
-//     // Input file
-//     const inputFile = document.createElement("input");
-//     inputFile.id = "file-upload";
-//     inputFile.name = "image";
-//     inputFile.type = "file";
-//     inputFile.required = true;
-//     inputFile.onchange = previewFile;
-//     labelFile.appendChild(inputFile);
-
-//     divForm.appendChild(labelFile);
-
-//     // Titre
-//     const pTitle = document.createElement("p");
-//     const labelTitle = document.createElement("label");
-//     labelTitle.setAttribute("for", "title");
-//     labelTitle.textContent = "Titre";
-//     const inputTitle = document.createElement("input");
-//     inputTitle.type = "text";
-//     inputTitle.id = "title";
-//     inputTitle.name = "title";
-//     inputTitle.maxLength = 32;
-//     inputTitle.required = true;
-//     labelTitle.appendChild(inputTitle);
-//     pTitle.appendChild(labelTitle);
-//     divForm.appendChild(pTitle);
-
-//     // Catégorie
-//     const pCategory = document.createElement("p");
-//     const labelCategory = document.createElement("label");
-//     labelCategory.setAttribute("for", "category");
-//     labelCategory.textContent = "Catégorie";
-//     const selectCategory = document.createElement("select");
-//     selectCategory.id = "category";
-//     selectCategory.name = "category";
-//     selectCategory.required = true;
-//     labelCategory.appendChild(selectCategory);
-//     pCategory.appendChild(labelCategory);
-//     divForm.appendChild(pCategory);
-
-//     form.appendChild(divForm);
-
-//     // Ligne bouton valider
-//     const pBtnLine = document.createElement("p");
-//     pBtnLine.classList.add("btnp-line");
-//     const inputSubmit = document.createElement("input");
-//     inputSubmit.type = "submit";
-//     inputSubmit.classList.add("btn-valider-ajout");
-//     inputSubmit.value = "Valider";
-//     pBtnLine.appendChild(inputSubmit);
-//     textError = document.createElement("span")
-//     textError.classList.add("text-error-add-photo")
-//     pBtnLine.appendChild(textError);
-//     form.appendChild(pBtnLine);
-
-//     gallery.appendChild(form);
-
-//     // Remplir les catégories
-//     try {
-//         const response = await fetchData("http://localhost:5678/api/categories");
-//         response.forEach(categories => {
-//             const option = document.createElement("option");
-//             option.value = categories.id;
-//             option.textContent = categories.name;
-//             selectCategory.appendChild(option);
-//         });
-//     } catch (error) {
-//     }
+ async function modalAjoutPhoto() {
+     const textTitreModal = document.querySelector(".modal h2");
+     const textBtn = document.querySelector(".btnp");
+     const gallery = document.querySelector(".ajout-galerie");
+     // Nettoyage et configuration
+     gallery.innerHTML = "";
+     textTitreModal.innerHTML = "Ajout photo";
+     textBtn.style.display = "none";
+     gallery.classList.add("ajout-projet");
+     // Formulaire
+     const form = document.createElement("form");
+     form.setAttribute("id", "form-ajout-photo");
+     form.setAttribute("enctype", "multipart/form-data");
+     // Conteneur du formulaire
+     const divForm = document.createElement("div");
+     divForm.classList.add("formulaire-photo");
+     // Label custom file upload
+     const labelFile = document.createElement("label");
+     labelFile.classList.add("custom-file-upload");
+     // Image preview
+     const imgPreview = document.createElement("img");
+     imgPreview.id = "preview";
+     imgPreview.style.display = "none";
+     imgPreview.alt = "aperçu";
+     labelFile.appendChild(imgPreview);
+     // Icône image
+     const icone = document.createElement("i");
+     icone.classList.add("fa-solid", "fa-image", "picture-file");
+     labelFile.appendChild(icone);
+     // Texte bouton
+     const spanBtnText = document.createElement("span");
+     spanBtnText.classList.add("btn-text");
+     spanBtnText.textContent = "+ Ajouter une photo";
+     labelFile.appendChild(spanBtnText);
+     // Infos fichier
+     const spanFileInfo = document.createElement("span");
+     spanFileInfo.classList.add("file-info");
+     spanFileInfo.textContent = "jpg, png : 4 Mo max";
+     labelFile.appendChild(spanFileInfo);
+     // Input file
+     const inputFile = document.createElement("input");
+     inputFile.id = "file-upload";
+     inputFile.name = "image";
+     inputFile.type = "file";
+     inputFile.required = true;
+     inputFile.onchange = previewFile;
+     labelFile.appendChild(inputFile);
+     divForm.appendChild(labelFile);
+     // Titre
+     const pTitle = document.createElement("p");
+     const labelTitle = document.createElement("label");
+     labelTitle.setAttribute("for", "title");
+     labelTitle.textContent = "Titre";
+     const inputTitle = document.createElement("input");
+     inputTitle.type = "text";
+     inputTitle.id = "title";
+     inputTitle.name = "title";
+     inputTitle.maxLength = 32;
+     inputTitle.required = true;
+     labelTitle.appendChild(inputTitle);
+     pTitle.appendChild(labelTitle);
+     divForm.appendChild(pTitle);
+     // Catégorie
+     const pCategory = document.createElement("p");
+     const labelCategory = document.createElement("label");
+     labelCategory.setAttribute("for", "category");
+     labelCategory.textContent = "Catégorie";
+     const selectCategory = document.createElement("select");
+     selectCategory.id = "category";
+     selectCategory.name = "category";
+     selectCategory.required = true;
+     labelCategory.appendChild(selectCategory);
+     pCategory.appendChild(labelCategory);
+     divForm.appendChild(pCategory);
+     form.appendChild(divForm);
+     // Ligne bouton valider
+     const pBtnLine = document.createElement("p");
+     pBtnLine.classList.add("btnp-line");
+     const inputSubmit = document.createElement("input");
+     inputSubmit.type = "submit";
+     inputSubmit.classList.add("btn-valider-ajout");
+     inputSubmit.value = "Valider";
+     pBtnLine.appendChild(inputSubmit);
+     textError = document.createElement("span")
+     textError.classList.add("text-error-add-photo")
+     pBtnLine.appendChild(textError);
+     form.appendChild(pBtnLine);
+     gallery.appendChild(form);
+     // Remplir les catégories
+     try {
+         const response = await fetchData("http://localhost:3000/api/produits");
+         response.forEach(categories => {
+             const option = document.createElement("option");
+             option.value = categories.id;
+             option.textContent = categories.name;
+             selectCategory.appendChild(option);
+         });
+     } catch (error) {
+     }
+    }
 
 //     // Validation en temps réel du formulaire
-//     function validatePhotoForm() {
-//         if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
-//             inputSubmit.classList.add("active");
-//             textError.textContent = ""
-//         } else {
-//             inputSubmit.classList.remove("active");
-//         }
-//     }
-
-//     form.addEventListener("input", validatePhotoForm);
-//     form.addEventListener("change", validatePhotoForm);
-//     inputSubmit.addEventListener("click",() => {
-//         if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
-//             return
-//         } else{
-//             textError.textContent = "Veuillez remplir tout les champs"
-//             textError.style.color = "red"
-//         }
-//         });
-
-//     updateFocusables();
-// }
-
-// //* Fonction retour de la modale */
-// function retourModal() {
-//             const textTitreModal = document.querySelector(".modal h2");
-//             const textBtn = document.querySelector(".btnp");
-//             const gallery = document.querySelector(".ajout-galerie");
-
-//             gallery.innerHTML = "";
-//             textTitreModal.innerHTML = "Galerie photo";
-//             textBtn.style.display = "flex";
-//             gallery.classList.remove("ajout-projet");
-//             modal();
-// }
+     function validatePhotoForm() {
+         if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
+             inputSubmit.classList.add("active");
+             textError.textContent = ""
+         } else {
+             inputSubmit.classList.remove("active");
+         }
+     
+     form.addEventListener("input", validatePhotoForm);
+     form.addEventListener("change", validatePhotoForm);
+     inputSubmit.addEventListener("click",() => {
+         if ( inputTitle.value.trim() !== "" && inputFile.files.length > 0 && selectCategory.value !== "") {
+             return
+         } else{
+             textError.textContent = "Veuillez remplir tout les champs"
+             textError.style.color = "red"
+         }
+         })
+     updateFocusables();
+ }
 
 // //* Fonction fermeture de la modale */
-// function closeModal() {
-//         const modal = document.querySelector(".modal");
-//         const modalContent = document.querySelector(".modal-content");
-//         modal.style.display = "none";
-//         modalContent.style.display = "none";
-// }
+ function closeModal() {
+         const modal = document.querySelector(".modal");
+         const modalContent = document.querySelector(".modal-content");
+         modal.style.display = "none";
+         modalContent.style.display = "none";
+ }
  
 // /* fonction de suppression de la photo, reçoit la figure à supprimer */
-// async function deletePhoto(figure) {
-//     const id = figure.getAttribute("data-id");
-//     const token = window.localStorage.getItem("token");
+async function deletePhoto(figure) {
+  const id = figure.dataset.id;
+  if (!id) {
+    console.error("Aucun ID n'est associé à ce produit.");
+    return;
+  }
   
-//     const response = await fetch(`http://localhost:5678/api/works/${id}`, {
-//       method: 'DELETE',
-//       headers: {
-//         'Authorization': `Bearer ${token}`
-//       }
-//     })
-//       if (response) {
-//         figure.remove();
-//         const portfolio = document.getElementById("portfolio");
-//         portfolio.innerHTML = ""
-//         projets();
-//     } 
-//     updateFocusables()
-// }
+  const token = window.localStorage.getItem("token");
+  try {
+    const response = await fetch(`http://localhost:3000/api/produits/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
-// // fonction ajout d'un nouveau projet
-// async function addPhoto(){
-//     const formEl = document.querySelector('#form-ajout-photo');
-//     const token = window.localStorage.getItem("token");
-//     const formData = new FormData(formEl);
+    if (response.ok) {
+      // Supprimez seulement l'élément du DOM
+      figure.remove();
+    } else {
+      console.error("Erreur lors de la suppression, statut:", response.status);
+    }
+  } catch (error) {
+    console.error("Erreur pendant la suppression :", error);
+  }
+  
+  updateFocusables();
+}
 
-//     const response = await fetch('http://localhost:5678/api/works/', {
-//         method: 'POST',
-//         headers: {
-//           'Authorization': `Bearer ${token}`
-//         },
-//         body: formData
-//     })
-//         if (response) {
-//         // retirer si on souhaite réouvrir la modale sur 'ajout photo'
-//         retourModal();
-//         //
-//         closeModal();
-//         const portfolio = document.getElementById("portfolio");
-//         portfolio.innerHTML = ""
-//         projets();
-//         // ajouter si on souhaite réouvrir la modale sur 'ajout photo'
-//         //modalAjoutPhoto()
-//         } 
+ // fonction ajout d'un nouveau projet
+ async function addPhoto(){
+     const formEl = document.querySelector('#form-ajout-photo');
+     const token = window.localStorage.getItem("token");
+     const formData = new FormData(formEl);
+     const response = await fetch('http://localhost:3000/api/produits/', {
+         method: 'POST',
+         headers: {
+           'Authorization': `Bearer ${token}`
+         },
+         body: formData
+     })
+         if (response) {
+         //
+         closeModal();
+         const portfolio = document.getElementById("portfolio");
+         portfolio.innerHTML = ""
+         projets();
+         // ajouter si on souhaite réouvrir la modale sur 'ajout photo'
+         //modalAjoutPhoto()
+         } 
+ }
 
-// }
+ // eventListener "click"
+ document.body.addEventListener("click", function(e) {
+     if (e.target.closest("#user-open")) {
+         if (window.localStorage.getItem("token")) {
+             const userOpen = document.querySelector("#user-open")
+             userOpen.innerHTML = "login"
+             window.localStorage.clear()
+             window.location.href = "index.html";
+         } else {
+             const userOpen = document.querySelector("#user-open")
+             userOpen.classList.toggle("click");
+         }
+     }
+     if (e.target.closest(".btn-ajout")) {
+         // Afficher la modale ajout photo
+         modalAjoutPhoto();
+     }
+     if (e.target.closest(".btn-close")) {
+         closeModal();
+     }
+     const modalContent = document.querySelector(".modal-content");
+     if (e.target === modalContent) {
+         // au clic en dehors de la modale, ferme la modale
+       closeModal();
+     }
+     if (e.target.closest(".icone-supprimer")) {
+         const figure = e.target.closest("figure");
+         // Suppression d'une photo 
+         deletePhoto(figure);
+     }
+     if (e.target.closest(".div-modification")) {
+         // Affichage de la modale de la galerie photo
+         const modal = document.querySelector(".modal");
+         const modalContent = document.querySelector(".modal-content");
+         modal.style.display = "flex";
+         modalContent.style.display = "flex";
+     }
+ });
 
-// // fonction modification du 'File' dans la modale 'ajoutPhotos'
-// function previewFile() {
-//     const file = document.querySelector("input[type=file]").files[0];
-//     const textError = document.querySelector(".text-error-add-photo");
-
-//     if (file) {
-//         if (file.size > 4 * 1024 * 1024) {
-//             textError.innerText = "Le fichier dépasse la limite de 4 Mo."
-//             textError.style.color = "red"
-//             return;
-//         } else {
-//             textError.innerText = ""
-//         }
-
-//         const allowedTypes = ["image/jpeg", "image/png"];
-//         if (!allowedTypes.includes(file.type)) {
-//             textError.innerText = "Seuls les fichiers JPG et PNG sont autorisés."
-//             textError.style.color = "red"
-//             return;
-//         } else {
-//             textError.innerText = ""
-//         }
-//     }
-
-//         const icone = document.querySelector(".picture-file");
-//         const preview = document.querySelector("#preview");
-//         const fileInfo = document.querySelector(".file-info");
-//         const btnText = document.querySelector(".btn-text");
-//         const reader = new FileReader();
-
-//         preview.style.display = "block";
-//         icone.style.display = "none";
-//         fileInfo.style.display = "none";
-//         btnText.style.display = "none";
-//         reader.addEventListener(
-//           "load",
-//           () => {
-//             preview.src = reader.result;
-//           },
-//           false,
-//         );
-      
-//         if (file) {
-//           reader.readAsDataURL(file);
-//         }
-// }
-
-// // eventListener "click"
-// document.body.addEventListener("click", function(e) {
-//     if (e.target.closest("#user-open")) {
-//         if (window.localStorage.getItem("token")) {
-//             const userOpen = document.querySelector("#user-open")
-//             userOpen.innerHTML = "login"
-//             window.localStorage.clear()
-//             window.location.href = "index.html";
-//         } else {
-//             const userOpen = document.querySelector("#user-open")
-//             userOpen.classList.toggle("click");
-//         }
-//     }
-//     if (e.target.closest(".btn-ajout")) {
-//         // Afficher la modale ajout photo
-//         modalAjoutPhoto();
-//     }
-//     if (e.target.closest(".btn-retour-modal")) {
-//         // Retour : Ajouter une photo de la modale 
-//         retourModal();
-//     }
-//     if (e.target.closest(".btn-close")) {
-//         // Fermeture de la modale 
-//         retourModal();
-//         closeModal();
-//     }
-//     const modalContent = document.querySelector(".modal-content");
-//     if (e.target === modalContent) {
-//         // au clic en dehors de la modale, ferme la modale
-//       closeModal();
-//     }
-//     if (e.target.closest(".icone-supprimer")) {
-//         const figure = e.target.closest("figure");
-//         // Suppression d'une photo 
-//         deletePhoto(figure);
-//     }
-//     if (e.target.closest(".div-modification")) {
-//         // Affichage de la modale de la galerie photo
-//         const modal = document.querySelector(".modal");
-//         const modalContent = document.querySelector(".modal-content");
-//         modal.style.display = "flex";
-//         modalContent.style.display = "flex";
-//     }
-// });
-
-// // eventListener "submit"
-// document.addEventListener("submit", function (e) {
-//     if(e.target.closest("#form-ajout-photo")){
-//         e.preventDefault();
-//         addPhoto();
-//     }
-// });
-
-// /* eventListener "keydown" */
-// window.addEventListener("keydown", function(e) {
-//     const modal = document.querySelector(".modal");
-//     if (e.key === "Escape" || e.key === "Esc") {
-//         closeModal();
-//     }
-//     const target = e.target.closest(".btn-retour-modal");
-//     if (target && e.key === "Enter") {
-//         retourModal();
-//     }
-//     // Exécuter le focus trap uniquement si la modale est visible
-//     if (e.key === "Tab") {
-//         // Vérifier si la modale est ouverte (par exemple, mode flex ou autre)
-//         if (window.getComputedStyle(modal).display !== "none") {
-//             e.preventDefault();
-//             focusInModal(e);
-//         }
-//     }
-// });
-
-// /* focus tab */
-// const focusInModal = function (e) {
-//     const modal = document.querySelector(".modal");
-//     e.preventDefault();
-//     let index = focusables.findIndex(f => f === modal.querySelector(':focus'));
-//     if (e.shiftKey) {
-//         index--;
-//     }
-//     else {
-//         index++;
-//     }
-//     if (index >= focusables.length) {
-//         index = 0;
-//     }
-//     if (index < 0) {
-//         index = focusables.length - 1;
-//     }
-
-//     focusables[index].focus();
-    
-// }
-
-// function updateFocusables() {
-//     const modal = document.querySelector(".modal");
-//     focusables = Array.from(modal.querySelectorAll(focusableSelector))
-//         .filter(el => !el.disabled && el.offsetParent !== null);
-// }
-
-// /* Modification du login suivant le localStorage */
-// if (window.localStorage.getItem("token")) {
-//     const userOpen = document.getElementById("user-open");
-//     userOpen.innerHTML = "log out";
-//     userOpen.style.fontWeight = "700"
-//     const modeEdition = document.createElement("div");
-//     const iconeEdition = document.createElement("i");
-//     const texteEdition = document.createElement("p");
-//     const body = document.querySelector("body");
-//     modeEdition.classList.add("mode-edition");
-//     iconeEdition.classList.add("fa-solid", "fa-pen-to-square");
-//     texteEdition.textContent = "Mode édition";
-//     body.style.marginTop = "59px";
-//     modeEdition.appendChild(iconeEdition);
-//     modeEdition.appendChild(texteEdition);
-//     body.appendChild(modeEdition);
-// }
-
-// function survolNav() {
-//     const btnNav = document.querySelectorAll(".btn-nav li")
-//     btnNav.forEach(btn => {
-//         if (btn) {
-//             btn.style.color = "", "important"
-            
-//         }
-
-//     })
-// }
-// survolNav()
+ /* eventListener "keydown" */
+ window.addEventListener("keydown", function(e) {
+     const modal = document.querySelector(".modal");
+     if (e.key === "Escape" || e.key === "Esc") {
+         closeModal();
+     }
+     // Exécuter le focus trap uniquement si la modale est visible
+     if (e.key === "Tab") {
+         // Vérifier si la modale est ouverte (par exemple, mode flex ou autre)
+         if (window.getComputedStyle(modal).display !== "none") {
+             e.preventDefault();
+             focusInModal(e);
+         }
+     }
+ });
+ /* focus tab */
+ const focusInModal = function (e) {
+     const modal = document.querySelector(".modal");
+     e.preventDefault();
+     let index = focusables.findIndex(f => f === modal.querySelector(':focus'));
+     if (e.shiftKey) {
+         index--;
+     }
+     else {
+         index++;
+     }
+     if (index >= focusables.length) {
+         index = 0;
+     }
+     if (index < 0) {
+         index = focusables.length - 1;
+     }
+     focusables[index].focus();
+  
+ }
+function updateFocusables() {
+     const modal = document.querySelector(".modal");
+     focusables = Array.from(modal.querySelectorAll(focusableSelector))
+         .filter(el => !el.disabled && el.offsetParent !== null);
+ }
+ if (window.localStorage.getItem("token")) {
+     const userOpen = document.getElementById("user-open");
+     userOpen.innerHTML = "log out";
+     userOpen.style.fontWeight = "700"
+     const modeEdition = document.createElement("div");
+     const iconeEdition = document.createElement("i");
+     const texteEdition = document.createElement("p");
+     const body = document.querySelector("body");
+     modeEdition.classList.add("mode-edition");
+     iconeEdition.classList.add("fa-solid", "fa-pen-to-square");
+     texteEdition.textContent = "Mode édition";
+     body.style.marginTop = "59px";
+     modeEdition.appendChild(iconeEdition);
+     modeEdition.appendChild(texteEdition);
+     body.appendChild(modeEdition);
+ }
+ function survolNav() {
+     const btnNav = document.querySelectorAll(".btn-nav li")
+     btnNav.forEach(btn => {
+         if (btn) {
+             btn.style.color = "", "important"
+          
+         }
+     })
+ }
+ survolNav()
 

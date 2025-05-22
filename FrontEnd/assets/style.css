@@ -280,6 +280,7 @@ header img{
 	color: black;
 }
 .gallery figure {
+	position: relative;
 	border: 1px solid #3a515188;
 	padding: 10px;
 	border-radius: 12px;
@@ -337,11 +338,12 @@ header img{
 /* zone de modification */
 .div-modification {
 	color: black;
-	font-size: 14px;
+	font-size: 16px;
 	display:flex;
-	position: absolute;
-	top: 10px;
-	left: 60%;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	margin: 80px auto;
 	gap: 10px;
 	border: none;
 	background-color: inherit;
@@ -473,37 +475,144 @@ header img{
 	transition: 0.3s;
 }
 /* modal */ 
-.modal{
-	display: none;
-	flex-direction: column;
-	justify-content: space-around;
-	align-items:center;
-	width: 630px;
-	height: 688px;
-	border-radius: 10px;
-	background-color: white;
-	position: relative;
+/* ══ Overlay ══ */
+.modal-content {
+  display: none;               /* en JS : passer à flex pour ouvrir */
+  position: fixed;
+  inset: 0;                    /* top:0; left:0; right:0; bottom:0; */
+  background: rgba(0,0,0,0.3);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: auto;              /* scroll si fenêtre plus petite */
+}
+
+/* ══ Modale (= inner box) ══ */
+.modal {
+  background: #fff;
+  width: 80vw;                 
+  max-width: 1200px;
+  height: 70vh;                
+  max-height: 700px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;            
 }
 .modal h2{
-	margin-top: 40px;
-	font-weight: 400;
-	font-size: 26px;
-	line-height: 100%;
-	letter-spacing: 0%;
-	color: black;
+  color: #3a5151;
+  text-align: center;
+  padding-bottom: 15px;
+  font-size: 25px;          
 }
-.modal-content{
-	display: none;
-	justify-content: center;
-	align-items: center;
-	position: fixed;
-	top: 0;
-	left: 0;
+
+/* ══ Formulaire en colonnes flexibles ══ */
+.modal form {
+	font-family: Geist;
+	color: #3a5151;
+	display: flex;
+	flex: 1;                     
+	gap: 20px;
+	overflow: hidden;            
+}
+/* Chaque colonne prend un tiers et scroll si besoin */
+.modal form > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#btn-valider-modification {
+	font-family: Geist;
+	background-color: #3a5151;
+	border: 1px solid white;
+	border-radius: 50px;
+	padding: 10px 20px;
+	font-weight: 500;
+	font-size: 14px;
+	margin-top: 20px;
+	color: white;
+	transition: 0.3s;
+}
+#btn-valider-modification:hover {
+	background-color: white;
+	border: 1px solid #3a5151;
+	color: #3a5151;
+	cursor: pointer;
+	transition: 0.3s;
+}
+.formulaire-modification-primaire label{
+	margin-top: 20px;
+}
+
+/* ══ Quill – conteneurs fixes + scroll interne ══ */
+.quill-editor {
+  flex: 1;           
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.quill-editor .ql-container {
+  flex: 1;                    
+  height: auto;                
+  max-height: 100%;            
+  overflow: hidden;            
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.quill-editor .ql-editor {
+  height: 100%;
+  overflow-y: auto;           
+  white-space: pre-wrap;       
+  overflow-wrap: break-word;   
+  box-sizing: border-box;
+  padding: 10px;
+}
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-delete-img {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+.image-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+.image-preview-gallery {
+  display: inline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+#preview-couverture{
 	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.3);
-	z-index: 1;
+	height: 20%;
+	object-fit: cover;
+	margin-bottom: 20px;
 }
+
+
+/*************************/
 .ajout-galerie img{
 	width: 76px;
 	height: 102px;
@@ -517,20 +626,47 @@ header img{
 .ajout-galerie figure{
 	position: relative;
 }
-.icone-supprimer{
+.icone-supprimer-modal{
 	position: absolute;
-	top: 20px;
-	right: 10px;
 	background-color: black;
 	color: white;
 	padding: 4px;
-	border-radius: 2px;
-	font-size: 10px;
+	border-radius: 8px;
+	opacity: 1 !important;
+	font-size: 15px;
 	cursor: pointer;
-	border: none;
+	margin: auto;
 }
+.icone-modifier,
+.icone-supprimer{
+	position: absolute;
+	background-color: black;
+	opacity: 0.4;
+	color: white;
+	padding: 4px;
+	border-radius: 8px;
+	border: 1px solid black;
+	font-size: 50px;
+	cursor: pointer;
+	width: 100%;
+	height: 50%;
+	margin: auto;
+}
+.icone-supprimer-modal,
+.icone-supprimer{
+	top: 0;
+	left: 0;
+	border-radius: 8px 8px 0px 0px;
+}
+.icone-modifier{
+	top: 50%;
+	left: 0;
+	border-radius: 0px 0px 8px 8px;
+}
+.icone-supprimer-modal:hover,
+.icone-modifier:hover,
 .icone-supprimer:hover{
-	opacity: 0.5;
+	opacity: 0.8 !important;
 }
 #introduction p {
 	margin-bottom: 0.5em;
@@ -660,9 +796,7 @@ header img{
 	align-items: center;
 	cursor: pointer;
 	border-radius: 4px;
-	width: 100%;
-	height: 169px;
-	background-color: #E8F1F6;
+	background-color: white;
 	margin-bottom: 10px;
 }
   #preview{
@@ -671,21 +805,25 @@ header img{
 	margin: 0px;
 }
   .custom-file-upload .btn-text {
-	background-color: #CBD6DC;
-	border: 1px solid #E8F1F6;
+	font-family: Geist;
+	background-color: #3a5151;
+	border: 1px solid white;
 	border-radius: 50px;
 	padding: 10px 20px;
 	font-weight: 500;
 	font-size: 14px;
 	margin-bottom: 0.25em;
+	color: white;
+	transition: 0.3s;
 }
 .picture-file{
 	color: #CBD6DC;
 	font-size: 50px;
 }
 .custom-file-upload .btn-text:hover {
-	background-color: #E8F1F6;
-	border: 1px solid #CBD6DC;
+	background-color: white;
+	border: 1px solid #3a5151;
+	color: #3a5151;
 }
 .custom-file-upload:focus-within .btn-text {
 	border: 1px solid black;
@@ -704,17 +842,7 @@ header img{
 	background-color: inherit;
 	cursor: pointer;
 }
-.btn-retour-modal{
-	position: absolute;
-	top: 30px;
-	left: 30px;
-	border: none;
-	background-color: inherit;
-	cursor: pointer;
-	font-size: 21px;
-}
-.btn-close:hover,
-.btn-retour-modal:hover{
+.btn-close:hover{
 	opacity: 0.5;
 }
 .btn-valider-ajout{

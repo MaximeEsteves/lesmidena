@@ -10,20 +10,64 @@
         integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
         crossorigin="anonymous" referrerpolicy="no-referrer" >
 	<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap" rel="stylesheet">	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
 	<script type="module" src="script.js" defer></script>
+	<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body id="btn-retour">
 	<div class="modal-content">
 		<div class="modal">
-			<h2>Galerie photo</h2>
 			<button class="btn-close"><i class="fa-solid fa-xmark fa-2xl"></i></button>
-			<div class="ajout-galerie"></div>
-			<p class="btnp">
-				<button class="btn-ajout">Ajouter une photo</button>
-			</p>
-			
+			<h2 class="titre-modal"></h2>
+<form id="product-form" enctype="multipart/form-data">
+    <!-- Tes inputs "categorie", "imageCouverture", "images"… -->
+<div class="formulaire-modification-primaire">
+	<!-- Les autres champs -->
+	<label>Catégorie</label><input type="text" name="categorie" />
+	<label>Nom</label><input type="text" name="nom" />
+	<label>Titre de description</label><input type="text" name="titreDescription" />
+	<label>Description courte</label><input type="text" name="description" />
+	<label>reference</label><input type="text" name="reference" />
+	<label>prix</label><input type="number" name="prix" step="0.01" />
+	<label>materiaux</label><input type="text" name="materiaux" />
+	<label>stock</label><input type="number" name="stock" min="0" />
+	<button id="btn-valider-modification" type="submit">Mettre à jour</button>
+</div>
+<div class="formulaire-modification-secondaire">
+	<!-- Conteneurs Quill -->
+	<label>Description complète</label>
+  <div id="editor-descriptionComplete" class="quill-editor"></div>
+  <input 
+    type="hidden" 
+    name="descriptionComplete" 
+    id="input-descriptionComplete" 
+  />
+</div>
+
+<!-- Ajout image de couverture -->
+<div class="add-photo-section" >
+	<div class="custom-file-upload" onclick="document.getElementById('file-upload-couverture').click()">
+  <input type="file" id="file-upload-couverture" name="imageCouverture" accept="image/jpeg,image/png">
+  <span class="btn-text">Modifier photo couverture</span>
+  <span class="file-info"></span>
+  <span class="text-error-add-photo"></span>
+</div>
+  <img id="preview-couverture">
+
+  <div class="custom-file-upload" onclick="document.getElementById('file-upload-images').click()">
+  <input type="file" id="file-upload-images" name="image" accept="image/jpeg,image/png" multiple>
+  <span class="btn-text">Ajouter photos produit</span>
+  <span class="file-info"></span>
+  <span class="text-error-add-photo"></span>
+</div>
+  <div id="preview-multi-images" class="image-preview-gallery"></div>
+
+</div>
+
+
+  </form>
 		</div>
 	</div>
 	<header>

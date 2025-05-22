@@ -1,19 +1,23 @@
- const fetchData = async (url, options = {}) => {
+const fetchData = async (url, options = {}) => {
     try {
         const res = await fetch(url, options);
-		if (res.ok) {
-			const data = await res.json()
-			return data
-		}
-	} catch (error) {
-        return error
-	}
-}
+        const data = await res.json();
+        if (res.ok) {
+            return data;
+        } else {
+            throw new Error(data.message || "Erreur inconnue");
+        }
+    } catch (error) {
+        console.error("Erreur fetch:", error.message);
+        return { error: true, message: error.message };
+    }
+};
+
  /* fonction connexion utilisateur */   
 async function login() {
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
-const data = await fetchData("http://localhost:3000/api/users/login", {
+const data = await fetchData("http://localhost:3000/api/auth/login", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"

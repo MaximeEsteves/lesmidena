@@ -1,4 +1,6 @@
 const Product = require("../models/Product");
+const path = require("path");
+const fs = require("fs");
 
 // ➕ Ajouter un produit
 exports.ajouterProduit = async (req, res) => {
@@ -12,21 +14,70 @@ exports.ajouterProduit = async (req, res) => {
 };
 
 // 🔄 Modifier un produit
+
 exports.modifierProduit = async (req, res) => {
   try {
-    const produitModifie = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!produitModifie) {
+    const produit = await Product.findById(req.params.id);
+    if (!produit) {
       return res.status(404).json({ message: "Produit non trouvé" });
     }
-    res.json({ message: "Produit modifié avec succès", produit: produitModifie });
+
+    // 🧼 1. Gestion des images à supprimer
+    let imagesASupprimer = req.body.imagesASupprimer;
+    if (!Array.isArray(imagesASupprimer)) {
+      if (imagesASupprimer) {
+        imagesASupprimer = [imagesASupprimer];
+      } else {
+        imagesASupprimer = [];
+      }
+    }
+
+    imagesASupprimer.forEach(imgPath => {
+      const fullPath = path.join(__dirname, "../", imgPath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath); // Supprime le fichier physique
+      }
+    });
+
+    // Mets à jour le tableau image[] en supprimant celles retirées
+    produit.image = produit.image.filter(img => !imagesASupprimer.includes(img));
+
+    // 📤 2. Ajout de nouvelles images
+    if (req.files && req.files.image) {
+      const files = Array.isArray(req.files.image) ? req.files.image : [req.files.image];
+      const nouvellesImages = files.map(file => `uploads/${file.filename}`);
+      produit.image.push(...nouvellesImages);
+    }
+
+    // 🖼️ 3. Mise à jour de l'image de couverture
+    if (req.files && req.files.imageCouverture && req.files.imageCouverture[0]) {
+      const couverture = req.files.imageCouverture[0];
+      produit.imageCouverture = `uploads/${couverture.filename}`;
+    }
+
+    // 📝 4. Mise à jour des champs texte
+    produit.categorie = req.body.categorie || produit.categorie;
+    produit.nom = req.body.nom || produit.nom;
+    produit.description = req.body.description || produit.description;
+    produit.titreDescription = req.body.titreDescription || produit.titreDescription;
+    produit.descriptionComplete = req.body.descriptionComplete || produit.descriptionComplete;
+    produit.materiaux = req.body.materiaux || produit.materiaux;
+    produit.prix = req.body.prix || produit.prix;
+    produit.reference = req.body.reference || produit.reference;
+    produit.stock = req.body.stock || produit.stock;
+
+    // ✅ 5. Sauvegarde en base
+    await produit.save();
+
+    res.json({ message: "Produit mis à jour avec succès", produit });
+
   } catch (error) {
+    console.error("Erreur modification :", error);
     res.status(500).json({ message: "Erreur lors de la modification", error });
   }
 };
+
+
 
 // ❌ Supprimer un produit
 exports.supprimerProduit = async (req, res) => {
