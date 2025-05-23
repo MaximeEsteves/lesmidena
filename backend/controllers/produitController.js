@@ -5,13 +5,38 @@ const fs = require("fs");
 // ➕ Ajouter un produit
 exports.ajouterProduit = async (req, res) => {
   try {
-    const nouveauProduit = new Product(req.body);
-    await nouveauProduit.save();
-    res.status(201).json({ message: "Produit ajouté avec succès", produit: nouveauProduit });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de l'ajout", error });
-  }
+    // Champs texte
+    const { categorie, nom, prix, description, titreDescription, descriptionComplete, materiaux, reference, stock } = req.body;
+
+    // Fichiers
+    // Multer te donne file.filename (sans chemin)
+// Fichiers (on ne garde que "uploads/filename", pas le chemin absolu)
+    const imageCouverture = `uploads/${req.files.imageCouverture[0].filename}`;
+    const imagesProduit   = (req.files.image || [])
+      .map(f => `uploads/${f.filename}`);
+
+
+    const product = new Product({
+      categorie,
+      nom,
+      prix,
+      description,
+      titreDescription,
+      descriptionComplete,
+      materiaux,
+      reference,
+      stock,
+      imageCouverture,
+      image: imagesProduit
+    });
+    await product.save();
+    res.status(201).json(product);
+  } catch (err) {
+  console.error("Erreur lors de l'ajout :", err.message || err, err.stack);
+  res.status(500).json({ message: "Erreur lors de l'ajout", error: err.message || err });
+}
 };
+
 
 // 🔄 Modifier un produit
 

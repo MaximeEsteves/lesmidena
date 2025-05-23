@@ -12,7 +12,17 @@ const { verifierToken, verifierAdmin } = require("../middleware/authMiddleware")
 const upload = require("../middleware/upload");
 
 router.get("/", getProduits);
-router.post("/", verifierToken, verifierAdmin, ajouterProduit);
+router.post(
+  "/",
+  verifierToken,
+  verifierAdmin,
+  upload.fields([
+    { name: "imageCouverture", maxCount: 1 },
+    { name: "image",           maxCount: 10 }
+  ]),
+  ajouterProduit
+);
+
 router.put(
    "/:id",
    verifierToken,

@@ -38,9 +38,39 @@ body {
 	flex-direction: column;
 }
 header {
-	display: flex;
-	justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  height: 100vh; /* Ajustez selon vos besoins */
 }
+
+/* Le wrapper occupe tout le header en arrière-plan */
+.parallax-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1; /* Placé en arrière-plan */
+}
+.parallax-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateY(0);
+  transition: transform 0.1s ease-out;
+}
+
+/* Le contenu du header */
+.header-content {
+  position: relative;
+  z-index: 2; /* Au-dessus du wrapper */
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Exemple d'effet parallax avec JS */
 h1{
 	font-family: 'Playfair Display', serif;
 	font-size: 22px;
@@ -67,19 +97,22 @@ a{
 header.scrolled nav {
   background-color: #3a5151;
   justify-content: center;
+  align-items: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   z-index: 1000;
   top: 0;
-  padding: 10px 0; 
-  transition: all 0.5s ease;
+  padding: 15px 0px; 
+  transition: all 0.3s ease;
   gap: 10%;
 }
-header.scrolled nav a#logo-nav-header{
+header.scrolled nav a#logo-nav-header img{
   transition: width 0.3s ease;
+  width: 80% !important;
 }
 header.scrolled nav ul li {
   border-bottom: 1px solid transparent;
-  transition: all 0.5s ease;
+  transition: all 0.3s ease;
+  padding-top: 15px;
 }
 header.scrolled nav ul li:hover {
   border-bottom-color: black;
@@ -123,6 +156,7 @@ header img{
 	top: 40%;
 	left: 18%;
 	text-align:center ;
+	z-index: 1;
 }
 .titre-header p{
 	text-align: left;
